@@ -1,0 +1,24 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "2.0.0",
+    "title": "Gibical Blog",
+    "description": "Gibical Blog APIs",
+    "termsOfService": "https://docs.gibical.app/",
+    "contact": {
+      "name": "Support",
+      "email": "info@gibical.app",
+      "url": "https://gibical.app/contact"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://blog.gibical.app/v1"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}
