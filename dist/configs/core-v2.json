@@ -2738,10 +2738,10 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "id_token"
+                  "access_token"
                 ],
                 "properties": {
-                  "id_token": {
+                  "access_token": {
                     "type": "string",
                     "description": "Access Token received from Google Using the token model(implicit grand model)"
                   }
