@@ -17,5 +17,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /srv/swagger
+            cp -r ./public/configs/ ./dist/configs/
             git reset --hard HEAD^
             git pull
