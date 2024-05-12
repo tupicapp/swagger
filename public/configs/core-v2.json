@@ -7792,6 +7792,42 @@
         }
       }
     },
+    "/share": {
+      "get": {
+        "tags": [
+          "Share"
+        ],
+        "description": "Get List of Share assets",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
     "/share/google-drive": {
       "post": {
         "tags": [
