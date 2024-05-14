@@ -7792,12 +7792,12 @@
         }
       }
     },
-    "/share": {
+    "/shares": {
       "get": {
         "tags": [
           "Share"
         ],
-        "description": "Get List of Share assets",
+        "description": "Get List of Shares",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -7828,7 +7828,7 @@
         }
       }
     },
-    "/share/google-drive": {
+    "/shares/google-drive": {
       "post": {
         "tags": [
           "Share"
@@ -7852,13 +7852,13 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "asset",
+                  "file",
                   "account"
                 ],
                 "properties": {
-                  "asset": {
+                  "file": {
                     "type": "integer",
-                    "description": "Asset id"
+                    "description": "File id"
                   },
                   "account": {
                     "type": "integer",
@@ -7896,7 +7896,7 @@
         }
       }
     },
-    "/share/youtube": {
+    "/shares/youtube": {
       "post": {
         "tags": [
           "Share"
@@ -7920,14 +7920,14 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "asset",
+                  "file",
                   "account",
-                  "title"
+                  "privacy"
                 ],
                 "properties": {
-                  "asset": {
+                  "file": {
                     "type": "integer",
-                    "description": "Asset id"
+                    "description": "File id"
                   },
                   "account": {
                     "type": "integer",
@@ -7981,7 +7981,7 @@
         }
       }
     },
-    "/share/twitter": {
+    "/shares/twitter": {
       "post": {
         "tags": [
           "Share"
@@ -8010,9 +8010,9 @@
                   "title"
                 ],
                 "properties": {
-                  "asset": {
+                  "file": {
                     "type": "integer",
-                    "description": "asset id"
+                    "description": "File id"
                   },
                   "account": {
                     "type": "integer",
@@ -8054,7 +8054,7 @@
         }
       }
     },
-    "/share/stream": {
+    "/shares/stream": {
       "post": {
         "tags": [
           "Share"
@@ -8078,13 +8078,13 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "asset",
+                  "file",
                   "account"
                 ],
                 "properties": {
-                  "asset": {
+                  "file": {
                     "type": "integer",
-                    "description": "Asset id"
+                    "description": "file id"
                   },
                   "account": {
                     "type": "integer",
