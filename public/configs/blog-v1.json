@@ -20,5 +20,471 @@
     {
       "bearerAuth": []
     }
-  ]
+  ],
+  "tags": [
+    {
+      "name": "Posts",
+      "description": "Blog Posts"
+    },
+    {
+      "name": "Pages",
+      "description": "Other Pages"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "parameters": {
+      "accept": {
+        "in": "header",
+        "name": "Accept",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "application/json"
+          ]
+        },
+        "example": "application/json"
+      },
+      "xApp": {
+        "in": "header",
+        "name": "X-App",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "_Web",
+            "_Android",
+            "_iOS"
+          ]
+        },
+        "example": "_Android",
+        "description": "api_token app property"
+      },
+      "language": {
+        "in": "header",
+        "name": "Accept-Language",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "en-US",
+            "fr-FR",
+            "de-DE"
+          ]
+        },
+        "example": "en-US",
+        "description": "The Accept-Language request HTTP header indicates locale that the client prefers"
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Validation error of the application parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "The error of not accessing the desired service"
+      },
+      "Unauthorized": {
+        "description": "User authentication error"
+      },
+      "RateLimiter": {
+        "description": "User authentication error, the number of requests exceeds the limit"
+      },
+      "NotFound": {
+        "description": "Error not finding the desired resource"
+      },
+      "Forbidden": {
+        "description": "Error accessing the desired resource"
+      }
+    },
+    "schemas": {
+      "Posts": {
+        "type": "array",
+        "items": {
+          "$ref" : "#/components/schemas/Post"
+        }
+
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "format": "url"
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "format": "url"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/posts": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "description": "Get list of blog posts",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Posts"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/posts/{postId}": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "description": "Get list of blog posts",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "query",
+            "description": "Post ID to show",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/tag/{tagName}": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "description": "Get list of blog posts by specific tag",
+        "parameters": [
+          {
+            "name": "tagName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Posts"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/category/{categoryName}": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "description": "Get list of blog posts by specific category",
+        "parameters": [
+          {
+            "name": "categoryName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Posts"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/sitemap": {
+        "get": {
+          "summary": "Get Sitemap",
+          "tags": ["Pages"],
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "posts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "example": 3
+                            },
+                            "updated_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-12-10T15:06:33.000000Z"
+                            },
+                            "slug": {
+                              "type": "string",
+                              "example": "broadcast-vs-broadband"
+                            }
+                          }
+                        }
+                      },
+                      "categories": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "slug": {
+                              "type": "string",
+                              "example": "Intro"
+                            }
+                          }
+                        }
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "example": 4
+                            },
+                            "slug": {
+                              "type": "string",
+                              "example": "STV"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "example": {
+                      "posts": [
+                        {
+                          "id": 3,
+                          "updated_at": "2023-12-10T15:06:33.000000Z",
+                          "slug": "broadcast-vs-broadband"
+                        },
+                        {
+                          "id": 2,
+                          "updated_at": "2023-11-04T19:30:59.000000Z",
+                          "slug": "media-asset-management"
+                        },
+                        {
+                          "id": 1,
+                          "updated_at": "2023-11-04T19:25:07.000000Z",
+                          "slug": "mdvs-summary"
+                        }
+                      ],
+                      "categories": [
+                        {
+                          "id": 1,
+                          "slug": "Intro"
+                        }
+                      ],
+                      "tags": [
+                        {
+                          "id": 4,
+                          "slug": "STV"
+                        },
+                        {
+                          "id": 3,
+                          "slug": "Brdnd"
+                        },
+                        {
+                          "id": 2,
+                          "slug": "Brdcst"
+                        },
+                        {
+                          "id": 1,
+                          "slug": "MDVS"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 }
