@@ -252,7 +252,7 @@
         "parameters": [
           {
             "name": "postId",
-            "in": "query",
+            "in": "path",
             "description": "Post ID to show",
             "required": true,
             "schema": {
@@ -295,7 +295,7 @@
         "parameters": [
           {
             "name": "tagName",
-            "in": "query",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string"
@@ -337,7 +337,7 @@
         "parameters": [
           {
             "name": "categoryName",
-            "in": "query",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string"
