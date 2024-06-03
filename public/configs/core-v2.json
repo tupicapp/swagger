@@ -8719,6 +8719,75 @@
         }
       }
     },
+    "/jobs": {
+      "get": {
+        "tags": [
+          "Job"
+        ],
+        "description": "get user jobs list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "status",
+                    "example": 2,
+                    "enum": [
+                      "done",
+                      "failed"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FactoryJob"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
     "/jobs/text-text": {
       "post": {
         "tags": [
@@ -9502,123 +9571,78 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "text"
-                ],
                 "properties": {
-                  "audios": {
+                  "tracks": {
                     "type": "array",
+                    "maxItems": 2,
                     "items": {
                       "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer",
-                          "description": "Unique ID",
-                          "example": 13
-                        }
-                      }
-                    }
-                  },
-                  "items": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
+                      "required": ["type", "items"],
                       "properties": {
                         "type": {
                           "type": "string",
-                          "description": "Image or video type",
-                          "example": "image",
-                          "enum": [
-                            "image",
-                            "video"
-                          ]
+                          "enum": ["image", "audio", "video"]
                         },
-                        "id": {
-                          "type": "integer",
-                          "description": "Unique ID of the image or video",
-                          "example": 13
-                        },
-                        "length": {
-                          "type": "integer",
-                          "description": "Playback length in seconds",
-                          "example": 4
-                        },
-                        "effect": {
-                          "type": "string",
-                          "description": "Effect",
-                          "example": "Zoom",
-                          "enum": [
-                            "Zoom"
-                          ]
-                        },
-                        "transition": {
-                          "type": "string",
-                          "description": "Job type",
-                          "example": "fade",
-                          "enum": [
-                            "fade",
-                            "wipeleft",
-                            "wiperight",
-                            "wipeup",
-                            "wipedown",
-                            "slideleft",
-                            "slideright",
-                            "slideup",
-                            "slidedown",
-                            "circlecrop",
-                            "rectcrop",
-                            "distance",
-                            "fadeblack",
-                            "fadewhite",
-                            "radial",
-                            "smoothleft",
-                            "smoothright",
-                            "smoothup",
-                            "smoothdown",
-                            "circleopen",
-                            "circleclose",
-                            "vertopen",
-                            "vertclose",
-                            "horzopen",
-                            "horzclose",
-                            "dissolve",
-                            "pixelize",
-                            "diagtl",
-                            "diagtr",
-                            "diagbl",
-                            "diagbr",
-                            "hlslice",
-                            "hrslice",
-                            "vuslice",
-                            "vdslice",
-                            "hblur",
-                            "fadegrays",
-                            "wipetr",
-                            "wipebl",
-                            "wipebr",
-                            "squeezeh",
-                            "squeezev",
-                            "zoomin",
-                            "fadefast",
-                            "fadeslow",
-                            "hlwind",
-                            "hrwind",
-                            "vuwind",
-                            "vdwind",
-                            "coverleft",
-                            "coverright",
-                            "coverup",
-                            "coverdown",
-                            "revealleft",
-                            "revealright",
-                            "revealup",
-                            "revealdown"
-                          ]
-                        },
-                        "transition_length": {
-                          "type": "integer",
-                          "description": "Conversion length",
-                          "example": 0.5
+                        "items": {
+                          "type": "array",
+                          "maxItems": 5,
+                          "items": {
+                            "type": "object",
+                            "required": ["id", "start", "length"],
+                            "properties": {
+                              "id": {
+                                "type": "integer",
+                                "description": "File ID",
+                                "example": 1
+                              },
+                              "start": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Start time",
+                                "example": 0.0
+                              },
+                              "length": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Length of the item",
+                                "example": 10.0
+                              },
+                              "fit": {
+                                "type": "string",
+                                "nullable": true,
+                                "enum": ["crop", "cover", "contain", "none"]
+                              },
+                              "effect": {
+                                "type": "string",
+                                "nullable": true,
+                                "enum": ["zoom"]
+                              },
+                              "transition": {
+                                "type": "string",
+                                "nullable": true,
+                                "enum": [
+                                  "fade", "wipeleft", "wiperight", "wipeup", "wipedown",
+                                  "slideleft", "slideright", "slideup", "slidedown", "circlecrop",
+                                  "rectcrop", "distance", "fadeblack", "fadewhite", "radial",
+                                  "smoothleft", "smoothright", "smoothup", "smoothdown", "circleopen",
+                                  "circleclose", "vertopen", "vertclose", "horzopen", "horzclose",
+                                  "dissolve", "pixelize", "diagtl", "diagtr", "diagbl", "diagbr",
+                                  "hlslice", "hrslice", "vuslice", "vdslice", "hblur", "fadegrays",
+                                  "wipetl", "wipetr", "wipebl", "wipebr", "squeezeh", "squeezev",
+                                  "zoomin", "fadefast", "fadeslow", "hlwind", "hrwind", "vuwind",
+                                  "vdwind", "coverleft", "coverright", "coverup", "coverdown",
+                                  "revealleft", "revealright", "revealup", "revealdown"
+                                ]
+                              },
+                              "transition_length": {
+                                "type": "number",
+                                "nullable": true,
+                                "minimum": 0,
+                                "description": "Transition length",
+                                "example": 1.0
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -9634,20 +9658,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "description": "Status\n* requested\n* started\n* finished\n* failed\n",
-                      "example": "none",
-                      "enum": [
-                        "requested",
-                        "started",
-                        "finished",
-                        "failed"
-                      ]
-                    }
-                  }
+                  "$ref": "#/components/schemas/FactoryJob"
                 }
               }
             }
