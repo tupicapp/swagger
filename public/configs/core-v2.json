@@ -160,10 +160,8 @@
               "file_share_create",
               "file_share_update",
               "file_share_delete",
-              "stripe_connect",
-              "stripe_account",
-              "stripe_balance",
-              "stripe_gateway",
+              "stripe_subscription",
+              "stripe_payout",
               "transaction_view_any",
               "comment_view_any",
               "comment_view",
@@ -1487,26 +1485,36 @@
           }
         }
       },
-      "StripeAccount": {
+      "Bill": {
         "type": "object",
-        "description": "Stripe Account",
+        "description": "Bills",
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "description": "Unique Identifier",
-            "example": 13
+            "example": "01j33cb83sqx3nq4vj81jwwc5a"
           },
           "user_id": {
             "type": "integer",
             "description": "User ID of the owner",
             "example": 33
           },
-          "external_id": {
+          "relation_type": {
             "type": "string",
-            "description": "Name"
+            "description": "relation_type",
+            "enum": [
+              "none",
+              "job"
+            ]
           },
-          "details": {
-            "type": "object"
+          "amount": {
+            "type": "integer",
+            "description": "amount in eur",
+            "example": 10
+          },
+          "description": {
+            "type": "string",
+            "example": "using text-audio service"
           },
           "created_at": {
             "type": "string",
@@ -1520,122 +1528,65 @@
           }
         }
       },
-      "StripeAccountLink": {
+      "Invoice": {
         "type": "object",
-        "description": "Account Links are the means by which a Connect platform grants a connected account permission to access Stripe-hosted applications, such as Connect Onboarding.",
+        "description": "Invoice",
         "properties": {
-          "object": {
+          "id": {
             "type": "string",
-            "description": "String representing the object's type. Objects of the same type",
-            "example": "account_link"
+            "description": "Unique Identifier",
+            "example": "01j33cb83sqx3nq4vj81jwwc5a"
           },
-          "created": {
+          "payer_id": {
             "type": "integer",
-            "description": "Time at which the object was created. Measured in seconds since the",
-            "example": 1700504636
+            "description": "User ID of the payer",
+            "example": 33
           },
-          "expires_at": {
+          "payee_id": {
             "type": "integer",
-            "description": "The timestamp at which this account link will expire.",
-            "example": 1700504936
+            "description": "User ID of the payee",
+            "example": 33
           },
-          "url": {
+          "relation_type": {
             "type": "string",
-            "description": "The URL for the account link.",
-            "example": "https://connect.stripe.com/setup/s/acct_1032D82eZvKYlo2C/tjDoZaVTpSR2"
+            "description": "type",
+            "enum": [
+              "asset-transfer",
+              "asset-subscription"
+            ]
+          },
+          "relation_id": {
+            "type": "integer",
+            "example": 10
+          },
+          "amount": {
+            "type": "integer",
+            "description": "amount in eur",
+            "example": 10
+          },
+          "status": {
+            "type": "string",
+            "description": "invoice status",
+            "enum": [
+              "draft",
+              "open",
+              "paid",
+              "cancelled",
+              "expired"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Time to Created",
+            "example": "2021-09-26T16:13:07.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Time of last update",
+            "example": "2021-09-26T16:13:07.000000Z"
           }
         }
       },
-      "StripeBalance": {
-        "type": "object",
-        "description": "This is an object representing your Stripe balance. You can retrieve it to see the balance currently on your Stripe account.",
-        "properties": {
-          "object": {
-            "type": "string",
-            "description": "String representing the object's type. Objects of the same type",
-            "example": "balance"
-          },
-          "available": {
-            "type": "array",
-            "description": "Available funds that you can transfer or pay out automatically by Stripe or explicitly through the Transfers API or Payouts API. You can find the available balance for each currency and payment type in the",
-            "items": {
-              "properties": {
-                "amount": {
-                  "type": "integer",
-                  "example": -76455
-                },
-                "currency": {
-                  "type": "string",
-                  "example": "eur"
-                },
-                "source_types": {
-                  "type": "object",
-                  "properties": {
-                    "bank_account": {
-                      "type": "integer",
-                      "example": 0
-                    },
-                    "card": {
-                      "type": "integer",
-                      "example": -76455
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "connect_reserved": {
-            "type": "array",
-            "description": "Funds held due to negative balances on connected Custom accounts. You can find the connect reserve balance for each currency and payment type in the source_types property.",
-            "items": {
-              "properties": {
-                "amount": {
-                  "type": "integer",
-                  "example": -76455
-                },
-                "currency": {
-                  "type": "string",
-                  "example": "eur"
-                }
-              }
-            }
-          },
-          "livemode": {
-            "type": "boolean",
-            "description": "Has the value true if the object exists in channel mode or the value false if the object exists in test mode.",
-            "example": false
-          },
-          "pending": {
-            "type": "array",
-            "description": "Funds that aren’t available in the balance yet. You can find the pending balance for each currency and each payment type in the source_types property.",
-            "items": {
-              "properties": {
-                "amount": {
-                  "type": "integer",
-                  "example": -76455
-                },
-                "currency": {
-                  "type": "string",
-                  "example": "eur"
-                },
-                "source_types": {
-                  "type": "object",
-                  "properties": {
-                    "bank_account": {
-                      "type": "integer",
-                      "example": 0
-                    },
-                    "card": {
-                      "type": "integer",
-                      "example": -76455
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "security": [
@@ -2196,12 +2147,12 @@
         }
       }
     },
-    "/stripe/connect": {
-      "post": {
+    "/bills": {
+      "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Stripe Connect",
+        "description": "to get bills",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2219,7 +2170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeAccountLink"
+                  "$ref": "#/components/schemas/Bill"
                 }
               }
             }
@@ -2233,12 +2184,12 @@
         }
       }
     },
-    "/stripe/account": {
+    "/invoices": {
       "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Get stripe account detail",
+        "description": "to get invoices that user is payer or payee",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2256,13 +2207,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeAccount"
+                  "$ref": "#/components/schemas/Invoice"
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2273,12 +2221,12 @@
         }
       }
     },
-    "/stripe/balance": {
+    "/invoices/{invoice}/link": {
       "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Get stripe balance",
+        "description": "to get invoice stripe url",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2288,6 +2236,15 @@
           },
           {
             "$ref": "#/components/parameters/language"
+          },
+          {
+            "in": "path",
+            "name": "invoice",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Invoice Unique Identifier"
           }
         ],
         "responses": {
@@ -2296,13 +2253,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeBalance"
-                }
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "example": "http://..."
+                    }
+                  }
+                },
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2313,12 +2273,12 @@
         }
       }
     },
-    "/stripe/gateway": {
+    "/stripe/subscription": {
       "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Get stripe balance",
+        "description": "to get Stripe subscription status and debt",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2336,13 +2296,159 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeBalance"
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "if subscription status is subscribed,it will return true",
+                      "example": false
+                    },
+                    "debt": {
+                      "type": "integer",
+                      "example": 0,
+                      "description": "Captcha Code"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "example": "eur"
+                    }
+                  }
                 }
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/stripe/subscription/link": {
+      "get": {
+        "tags": [
+          "Stripe"
+        ],
+        "description": "to get Stripe subscription registration link at first time and get subscription modification link after subscription (update or delete card, show bills, ..)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "link": {
+                      "type": "string",
+                      "description": "link to get gibical subscription"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/stripe/payout": {
+      "get": {
+        "tags": [
+          "Stripe"
+        ],
+        "description": "to get Stripe payout status (stripe express) - all people hwo wants earn money from gibical and sell assets must have enable payout service",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/stripe/payout/link": {
+      "get": {
+        "tags": [
+          "Stripe"
+        ],
+        "description": "to get Stripe subscription registration link at first time and get subscription modification link after subscription (update or delete card, show bills, ..)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "setup": {
+                      "type": "string",
+                      "description": "link to setup"
+                    },
+                    "dashboard": {
+                      "type": "string",
+                      "description": "link to dashboard"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -9496,29 +9602,21 @@
           },
           {
             "$ref": "#/components/parameters/language"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "description": "status",
-                    "example": 2,
-                    "enum": [
-                      "done",
-                      "failed"
-                    ]
-                  }
-                }
-              }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "description": "to filter by job status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "done",
+                "failed"
+              ]
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",

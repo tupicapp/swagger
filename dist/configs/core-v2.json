@@ -160,10 +160,8 @@
               "file_share_create",
               "file_share_update",
               "file_share_delete",
-              "stripe_connect",
-              "stripe_account",
-              "stripe_balance",
-              "stripe_gateway",
+              "stripe_subscription",
+              "stripe_payout",
               "transaction_view_any",
               "comment_view_any",
               "comment_view",
@@ -1487,26 +1485,36 @@
           }
         }
       },
-      "StripeAccount": {
+      "Bill": {
         "type": "object",
-        "description": "Stripe Account",
+        "description": "Bills",
         "properties": {
           "id": {
-            "type": "integer",
+            "type": "string",
             "description": "Unique Identifier",
-            "example": 13
+            "example": "01j33cb83sqx3nq4vj81jwwc5a"
           },
           "user_id": {
             "type": "integer",
             "description": "User ID of the owner",
             "example": 33
           },
-          "external_id": {
+          "relation_type": {
             "type": "string",
-            "description": "Name"
+            "description": "relation_type",
+            "enum": [
+              "none",
+              "job"
+            ]
           },
-          "details": {
-            "type": "object"
+          "amount": {
+            "type": "integer",
+            "description": "amount in eur",
+            "example": 10
+          },
+          "description": {
+            "type": "string",
+            "example": "using text-audio service"
           },
           "created_at": {
             "type": "string",
@@ -1520,122 +1528,65 @@
           }
         }
       },
-      "StripeAccountLink": {
+      "Invoice": {
         "type": "object",
-        "description": "Account Links are the means by which a Connect platform grants a connected account permission to access Stripe-hosted applications, such as Connect Onboarding.",
+        "description": "Invoice",
         "properties": {
-          "object": {
+          "id": {
             "type": "string",
-            "description": "String representing the object's type. Objects of the same type",
-            "example": "account_link"
+            "description": "Unique Identifier",
+            "example": "01j33cb83sqx3nq4vj81jwwc5a"
           },
-          "created": {
+          "payer_id": {
             "type": "integer",
-            "description": "Time at which the object was created. Measured in seconds since the",
-            "example": 1700504636
+            "description": "User ID of the payer",
+            "example": 33
           },
-          "expires_at": {
+          "payee_id": {
             "type": "integer",
-            "description": "The timestamp at which this account link will expire.",
-            "example": 1700504936
+            "description": "User ID of the payee",
+            "example": 33
           },
-          "url": {
+          "relation_type": {
             "type": "string",
-            "description": "The URL for the account link.",
-            "example": "https://connect.stripe.com/setup/s/acct_1032D82eZvKYlo2C/tjDoZaVTpSR2"
+            "description": "type",
+            "enum": [
+              "asset-transfer",
+              "asset-subscription"
+            ]
+          },
+          "relation_id": {
+            "type": "integer",
+            "example": 10
+          },
+          "amount": {
+            "type": "integer",
+            "description": "amount in eur",
+            "example": 10
+          },
+          "status": {
+            "type": "string",
+            "description": "invoice status",
+            "enum": [
+              "draft",
+              "open",
+              "paid",
+              "cancelled",
+              "expired"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "description": "Time to Created",
+            "example": "2021-09-26T16:13:07.000000Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "Time of last update",
+            "example": "2021-09-26T16:13:07.000000Z"
           }
         }
       },
-      "StripeBalance": {
-        "type": "object",
-        "description": "This is an object representing your Stripe balance. You can retrieve it to see the balance currently on your Stripe account.",
-        "properties": {
-          "object": {
-            "type": "string",
-            "description": "String representing the object's type. Objects of the same type",
-            "example": "balance"
-          },
-          "available": {
-            "type": "array",
-            "description": "Available funds that you can transfer or pay out automatically by Stripe or explicitly through the Transfers API or Payouts API. You can find the available balance for each currency and payment type in the",
-            "items": {
-              "properties": {
-                "amount": {
-                  "type": "integer",
-                  "example": -76455
-                },
-                "currency": {
-                  "type": "string",
-                  "example": "eur"
-                },
-                "source_types": {
-                  "type": "object",
-                  "properties": {
-                    "bank_account": {
-                      "type": "integer",
-                      "example": 0
-                    },
-                    "card": {
-                      "type": "integer",
-                      "example": -76455
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "connect_reserved": {
-            "type": "array",
-            "description": "Funds held due to negative balances on connected Custom accounts. You can find the connect reserve balance for each currency and payment type in the source_types property.",
-            "items": {
-              "properties": {
-                "amount": {
-                  "type": "integer",
-                  "example": -76455
-                },
-                "currency": {
-                  "type": "string",
-                  "example": "eur"
-                }
-              }
-            }
-          },
-          "livemode": {
-            "type": "boolean",
-            "description": "Has the value true if the object exists in channel mode or the value false if the object exists in test mode.",
-            "example": false
-          },
-          "pending": {
-            "type": "array",
-            "description": "Funds that aren’t available in the balance yet. You can find the pending balance for each currency and each payment type in the source_types property.",
-            "items": {
-              "properties": {
-                "amount": {
-                  "type": "integer",
-                  "example": -76455
-                },
-                "currency": {
-                  "type": "string",
-                  "example": "eur"
-                },
-                "source_types": {
-                  "type": "object",
-                  "properties": {
-                    "bank_account": {
-                      "type": "integer",
-                      "example": 0
-                    },
-                    "card": {
-                      "type": "integer",
-                      "example": -76455
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "security": [
@@ -1655,6 +1606,10 @@
     {
       "name": "Auth",
       "description": "User Signin/SignUp"
+    },
+    {
+      "name": "OAuth",
+      "description": "OAuth2 APIs"
     },
     {
       "name": "Countries",
@@ -2192,12 +2147,12 @@
         }
       }
     },
-    "/stripe/connect": {
-      "post": {
+    "/bills": {
+      "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Stripe Connect",
+        "description": "to get bills",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2215,7 +2170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeAccountLink"
+                  "$ref": "#/components/schemas/Bill"
                 }
               }
             }
@@ -2229,12 +2184,12 @@
         }
       }
     },
-    "/stripe/account": {
+    "/invoices": {
       "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Get stripe account detail",
+        "description": "to get invoices that user is payer or payee",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2252,13 +2207,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeAccount"
+                  "$ref": "#/components/schemas/Invoice"
                 }
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2269,12 +2221,12 @@
         }
       }
     },
-    "/stripe/balance": {
+    "/invoices/{invoice}/link": {
       "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Get stripe balance",
+        "description": "to get invoice stripe url",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2284,6 +2236,15 @@
           },
           {
             "$ref": "#/components/parameters/language"
+          },
+          {
+            "in": "path",
+            "name": "invoice",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "Invoice Unique Identifier"
           }
         ],
         "responses": {
@@ -2292,13 +2253,16 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeBalance"
-                }
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "example": "http://..."
+                    }
+                  }
+                },
               }
             }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2309,12 +2273,12 @@
         }
       }
     },
-    "/stripe/gateway": {
+    "/stripe/subscription": {
       "get": {
         "tags": [
           "Stripe"
         ],
-        "description": "Get stripe balance",
+        "description": "to get Stripe subscription status and debt",
         "parameters": [
           {
             "$ref": "#/components/parameters/accept"
@@ -2332,13 +2296,159 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/StripeBalance"
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "if subscription status is subscribed,it will return true",
+                      "example": false
+                    },
+                    "debt": {
+                      "type": "integer",
+                      "example": 0,
+                      "description": "Captcha Code"
+                    },
+                    "currency": {
+                      "type": "string",
+                      "example": "eur"
+                    }
+                  }
                 }
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/stripe/subscription/link": {
+      "get": {
+        "tags": [
+          "Stripe"
+        ],
+        "description": "to get Stripe subscription registration link at first time and get subscription modification link after subscription (update or delete card, show bills, ..)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "link": {
+                      "type": "string",
+                      "description": "link to get gibical subscription"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/stripe/payout": {
+      "get": {
+        "tags": [
+          "Stripe"
+        ],
+        "description": "to get Stripe payout status (stripe express) - all people hwo wants earn money from gibical and sell assets must have enable payout service",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/stripe/payout/link": {
+      "get": {
+        "tags": [
+          "Stripe"
+        ],
+        "description": "to get Stripe subscription registration link at first time and get subscription modification link after subscription (update or delete card, show bills, ..)",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "setup": {
+                      "type": "string",
+                      "description": "link to setup"
+                    },
+                    "dashboard": {
+                      "type": "string",
+                      "description": "link to dashboard"
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2940,6 +3050,764 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/oauth/clients": {
+      "post": {
+        "tags": [
+          "OAuth"
+        ],
+        "description": "Create OAuth2 Client",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "redirect"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Client name"
+                  },
+                  "redirect": {
+                    "type": "string",
+                    "description": "Redirect URI"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "integer",
+                      "example": 7
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Client 1"
+                    },
+                    "secret": {
+                      "type": "string",
+                      "example": "DDkkUnxXRtXN1OnT2qUhuBQ7IyU4MDX1s64558"
+                    },
+                    "provider": {
+                      "type": "string",
+                      "example": null
+                    },
+                    "redirect": {
+                      "type": "string",
+                      "example": "http://example.com/callback"
+                    },
+                    "personal_access_client": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "password_client": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "revoked": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-07-10T16:57:07.000000Z"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-07-10T16:57:07.000000Z"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "example": 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/v2/oauth/get-auth-token": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "description": "Get Auth Token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            },
+            "example": "http://example.com/callback"
+          },
+          {
+            "name": "response_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "code"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "profile-update,user-delete"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "qwqwqwqwqw"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "requestBody": {
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "integer",
+                      "example": 7
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Client 1"
+                    },
+                    "secret": {
+                      "type": "string",
+                      "example": "DDkkUnxXRtXN1OnT2qUhuBQ7IyU4MDX1s64558"
+                    },
+                    "provider": {
+                      "type": "string",
+                      "example": null
+                    },
+                    "redirect": {
+                      "type": "string",
+                      "example": "http://example.com/callback"
+                    },
+                    "personal_access_client": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "password_client": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "revoked": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-07-10T16:57:07.000000Z"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2024-07-10T16:57:07.000000Z"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "example": 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/v2/oauth/get-auth-code": {
+      "post": {
+        "tags": [
+          "OAuth"
+        ],
+        "description": "Get Auth Code",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": "3"
+          },
+          {
+            "name": "auth_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Rpx8KINzCftvWtGp"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "dgh45rtg8t1h5r8hrh5"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "redirect_url": {
+                      "type": "string",
+                      "example": "http://example.com/callback?code=def50200f97e05b8bbedcedf71898ea76235932de55a7c9fa4adc83cdd1c4d485df865655f50fb15d429193db448d84c4d7421e756e4630990604fe192cdd6e09a4fdf53ed4d9dbf1598dce902ca0ab67261f7623895e69260d4bd600226df7053e6ee859881a1&state=dgh45rtg8t1h5r8hrh5"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/oauth/token": {
+      "post": {
+        "tags": [
+          "OAuth"
+        ],
+        "description": "Get OAuth Access Token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "grant_type",
+                  "client_id",
+                  "client_secret",
+                  "redirect_uri",
+                  "code"
+                ],
+                "properties": {
+                  "grant_type": {
+                    "type": "string",
+                    "description": "Grant type",
+                    "example": "authorization_code"
+                  },
+                  "client_id": {
+                    "type": "integer",
+                    "description": "Client ID",
+                    "example": "3"
+                  },
+                  "client_secret": {
+                    "type": "string",
+                    "description": "Client Secret",
+                    "example": "DDkkUnxXRtXN1OnT2qUhuBQ7IyU4MDX1s4KRlXv3"
+                  },
+                  "redirect_uri": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Redirect URI",
+                    "example": "http://example.com/callback"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "Auth Code from previous step",
+                    "example": "def50200f97e05b8bbedcedf71898ea76235932de55a7c9fa4adc83cdd1c4d485df865655f50fb15d429193db448d84c4d7421e756e4630990604fe192cdd6e09f888e81c9e88b10b759eb6e8ba724a372bd729477aad2b1113dd79a37c2c16ebc6eb6c4bf96fa6ebb70eb46b266c18be48c8d8aee2d9f77c57f4e6c2cfcbed155be80907f3814ba9f1671d52fe255e4dc4b064e8e92b161abf63377b4322b70549e16b106829d9937c80ab78809c42baf094ffe6d2c1689c498c461f878c2d0f3d6959606dbac98e0264a0373f8e1e6c67c4ca16e67779e309230ae33e6fc900318e7498b498568817aa2fd484450271fd6ef4fd0bae3ac2215e9f51818a99e604d8f690c9f6b57a2a3d47cd64b83abc6c2f6bc18279104cc379a0fd876304a7d19cfbfffe18af969754eed859f42d5e9b6098d163c9fad07966f2dfa6aaa79b6df6c98fa4fdf53ed4d9dbf1598dce902ca0ab67261f7623895e69260d4bd600226df7053e6ee859881a1"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token_type": {
+                      "type": "string",
+                      "example": "Bearer"
+                    },
+                    "expires_in": {
+                      "type": "integer",
+                      "example": "3153600"
+                    },
+                    "access_token": {
+                      "type": "string",
+                      "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiMjIxMDBiYTBmY2QyZGFjODg2NWIwODNmNTY1ZDRhYzE4YmQzYWYzOGJmNTBjNzZkOWZlY2ViNzExZmQ3MDg5NzRjMzc5ZGRhZWU4MjFhMTAiLCJpYXQiOjE3MjA2MzI1NDQuMDgzNjM0LCJuYmYiOjE3MjA2MzI1NDQuMDgzNjM3LCJleHAiOjE3NTIxNjg1NDQuMDU0OTYxLCJzdWIiOiI3Iiwic2NvcGVzIjpbInByb2ZpbGUtdXBkYXRlIl19.zLeDl8sUU4WfBZGkGZ4t3lJxcCCO9JcxTlXLRsfodIFeALt5FVnaGrvTORCm5o5RSYvhUEmwBWDkr-Iet8_xpD533jTSXBJOh6IYpjH9rVuw-za8mXNOZWtFLD1qlEqDdmFjxtL3wbJjQNkNN9x0KXvE7y_0RSqJUq2Z9J99ApiED6XgD6O2mHYWGEl-w49JLIrYMzmxyqlnQdJabKvzL1E4DWOt8eUdqdgZX1-ND1VUFTTe0an8TRSM-u1zWdYYPH8W1fgjcPBfm8pZJp2TMfwn8qHAO2_E0sb0e52MwzmKpgDpH9u4NI4ujaqiuQzhoK99C7arrCdNGc6nBXfLFdBb2epTFf7ZTe9SP-lR-1DtGYdtnsW3GpspgnqKU3jt28f5sudW6NfhWNd2hK9dVYEvnxk1x46s0Vm1Ui6v9G1Xnx2FqBlF-t-Mut4r8f1fxRXkX6uVpgEc8LKYOZ8V44C19Df5LlQH2q6wdn6CfWzSKpcQvlSxrPqKjUiPrW8X9rwwDJDQ3J52jN72hnp1YhN8Xm2EH3nc_Ddzpp7koIfYIMchLeg3yHU3hvUlVyAlkF8UdIGvU9r6uuZd5B2LGR5h0eyQhFrj7kfFXBGRt0DJKrejtDyd6phcRcMpxSrgRZas4AznEfao373i4X_u9dYX6SduJg-fgNQz45lU9Pk"
+                    },
+                    "refresh_token": {
+                      "type": "string",
+                      "example": "def50200f98651d672507e4039c689d50549b0a4d324c426e6ec01d8db9b57f608ecf8a22da3b2537e8f9237e2170399e9be6af18d117dbfdd1b20c009a18ff83da4c7fa4e452c856e5874e1be16555e1c1081e2d0f061fe3428af171bcc744e8546dfe8cb596c51f612906b6b218a7b060133206efc26eaa0e4cc18b320c4676d1de1bb1d63335190742184bbb7cfad5625588c754b2a01098dc0b396e6730e4c5ecf3f9e1df16f59a54383e7634843629aaa0299da7aa4269b6ff25551caa453dccdf5e36fb4a88cdda24b579bbceb9458245e5035f8e0c0c8baf40e2c6cd0ac9c399115e9a507a8f286afb7c6040025fd541f1180d23f2477be9d8f8eb2ecd3925b35f8daf1885df0de83bda1ddbd352d4014bad163f6c9a0c4e0f0bd533a520d744804bb31a9eeabdaf08625a9b1be67b8f49f3cadc14baf7f169851404311289d463ec0602caef17a2013fde6a1fab5b2e08c3dc777b182646cfc42dfc86c41481cbf6bfbf41f22403d5fba4b21a1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/v2/oauth/deny-auth": {
+      "delete": {
+        "tags": [
+          "OAuth"
+        ],
+        "description": "Deny Authenticated Session",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": "3"
+          },
+          {
+            "name": "auth_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Rpx8KINzCftvWtGp"
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "dgh45rtg8t1h5r8hrh5"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "redirect_url": {
+                      "type": "string",
+                      "example": "http://example.com/callback?state=qwqwqwqwqw"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimiter"
+          }
+        }
+      }
+    },
+    "/oauth/scopes": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "description": "Get List of oauth scopes",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/accept"
+          },
+          {
+            "$ref": "#/components/parameters/xApp"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "profile-update"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Allows update profile"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "scopes": {
+                    "value": [
+                      {
+                        "id": "api-token-view-any",
+                        "description": "Allows view all api tokens"
+                      },
+                      {
+                        "id": "api-token-create",
+                        "description": "Allows create api tokens"
+                      },
+                      {
+                        "id": "api-token-view",
+                        "description": "Allows delete api tokens"
+                      },
+                      {
+                        "id": "asset-view-any",
+                        "description": "Allows view all assets"
+                      },
+                      {
+                        "id": "asset-view",
+                        "description": "Allows view an assets"
+                      },
+                      {
+                        "id": "asset-create",
+                        "description": "Allows create an asset"
+                      },
+                      {
+                        "id": "asset-update",
+                        "description": "Allows update an asset"
+                      },
+                      {
+                        "id": "asset-delete",
+                        "description": "Allows delete an asset"
+                      },
+                      {
+                        "id": "asset-buy",
+                        "description": "Allows buy an asset"
+                      },
+                      {
+                        "id": "image-view-any",
+                        "description": "Allows view all images"
+                      },
+                      {
+                        "id": "image-view",
+                        "description": "Allows view an image"
+                      },
+                      {
+                        "id": "image-create",
+                        "description": "Allows create an image"
+                      },
+                      {
+                        "id": "image-update",
+                        "description": "Allows update an image"
+                      },
+                      {
+                        "id": "image-delete",
+                        "description": "Allows delete an image"
+                      },
+                      {
+                        "id": "file-view-any",
+                        "description": "Allows view all files"
+                      },
+                      {
+                        "id": "file-view",
+                        "description": "Allows view an file"
+                      },
+                      {
+                        "id": "file-create",
+                        "description": "Allows create an file"
+                      },
+                      {
+                        "id": "file-update",
+                        "description": "Allows update an file"
+                      },
+                      {
+                        "id": "file-delete",
+                        "description": "Allows delete an file"
+                      },
+                      {
+                        "id": "audio-view-any",
+                        "description": "Allows view all audios"
+                      },
+                      {
+                        "id": "audio-view",
+                        "description": "Allows view an audio"
+                      },
+                      {
+                        "id": "audio-create",
+                        "description": "Allows create an audio"
+                      },
+                      {
+                        "id": "audio-update",
+                        "description": "Allows update an audio"
+                      },
+                      {
+                        "id": "audio-delete",
+                        "description": "Allows delete an audio"
+                      },
+                      {
+                        "id": "video-view-any",
+                        "description": "Allows view all videos"
+                      },
+                      {
+                        "id": "video-create",
+                        "description": "Allows create an video"
+                      },
+                      {
+                        "id": "video-update",
+                        "description": "Allows update an video"
+                      },
+                      {
+                        "id": "video-delete",
+                        "description": "Allows delete an video"
+                      },
+                      {
+                        "id": "video-view",
+                        "description": "Allows view an video"
+                      },
+                      {
+                        "id": "text-view-any",
+                        "description": "Allows view all texts"
+                      },
+                      {
+                        "id": "text-create",
+                        "description": "Allows create an text"
+                      },
+                      {
+                        "id": "text-update",
+                        "description": "Allows update an text"
+                      },
+                      {
+                        "id": "text-delete",
+                        "description": "Allows delete an file"
+                      },
+                      {
+                        "id": "text-view",
+                        "description": "Allows view an text"
+                      },
+                      {
+                        "id": "file-share-view-any",
+                        "description": "Allows view all file shares"
+                      },
+                      {
+                        "id": "file-share-create",
+                        "description": "Allows create an file share"
+                      },
+                      {
+                        "id": "file-share-update",
+                        "description": "Allows update an file share"
+                      },
+                      {
+                        "id": "file-share-delete",
+                        "description": "Allows delete an file share"
+                      },
+                      {
+                        "id": "stripe-account",
+                        "description": "Allows get account info from stripe"
+                      },
+                      {
+                        "id": "stripe-payout",
+                        "description": "context.oauth-scopes.stripe-payout"
+                      },
+                      {
+                        "id": "transaction-view-any",
+                        "description": "Allows view all transactions"
+                      },
+                      {
+                        "id": "comment-view-any",
+                        "description": "Allows view all comments"
+                      },
+                      {
+                        "id": "comment-view",
+                        "description": "Allows view an comment"
+                      },
+                      {
+                        "id": "comment-create",
+                        "description": "Allows create an comment"
+                      },
+                      {
+                        "id": "comment-update",
+                        "description": "Allows update an comment"
+                      },
+                      {
+                        "id": "comment-delete",
+                        "description": "Allows delete an comment"
+                      },
+                      {
+                        "id": "comment-approve",
+                        "description": "Allows approve an comment"
+                      },
+                      {
+                        "id": "comment-reject",
+                        "description": "Allows reject an comment"
+                      },
+                      {
+                        "id": "external-account-view",
+                        "description": "Allows view an external account"
+                      },
+                      {
+                        "id": "external-account-view-any",
+                        "description": "Allows view all external accounts"
+                      },
+                      {
+                        "id": "external-account-create",
+                        "description": "Allows create external account"
+                      },
+                      {
+                        "id": "external-account-update",
+                        "description": "Allows update external account"
+                      },
+                      {
+                        "id": "external-account-delete",
+                        "description": "Allows delete external account"
+                      },
+                      {
+                        "id": "profile-update",
+                        "description": "Allows update profile"
+                      },
+                      {
+                        "id": "user-delete",
+                        "description": "Allows delete user"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -8734,29 +9602,21 @@
           },
           {
             "$ref": "#/components/parameters/language"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "description": "status",
-                    "example": 2,
-                    "enum": [
-                      "done",
-                      "failed"
-                    ]
-                  }
-                }
-              }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "description": "to filter by job status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "done",
+                "failed"
+              ]
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9577,18 +10437,29 @@
                     "maxItems": 2,
                     "items": {
                       "type": "object",
-                      "required": ["type", "items"],
+                      "required": [
+                        "type",
+                        "items"
+                      ],
                       "properties": {
                         "type": {
                           "type": "string",
-                          "enum": ["image", "audio", "video"]
+                          "enum": [
+                            "image",
+                            "audio",
+                            "video"
+                          ]
                         },
                         "items": {
                           "type": "array",
                           "maxItems": 5,
                           "items": {
                             "type": "object",
-                            "required": ["id", "start", "length"],
+                            "required": [
+                              "id",
+                              "start",
+                              "length"
+                            ],
                             "properties": {
                               "id": {
                                 "type": "integer",
@@ -9610,28 +10481,82 @@
                               "fit": {
                                 "type": "string",
                                 "nullable": true,
-                                "enum": ["crop", "cover", "contain", "none"]
+                                "enum": [
+                                  "crop",
+                                  "cover",
+                                  "contain",
+                                  "none"
+                                ]
                               },
                               "effect": {
                                 "type": "string",
                                 "nullable": true,
-                                "enum": ["zoom"]
+                                "enum": [
+                                  "zoom"
+                                ]
                               },
                               "transition": {
                                 "type": "string",
                                 "nullable": true,
                                 "enum": [
-                                  "fade", "wipeleft", "wiperight", "wipeup", "wipedown",
-                                  "slideleft", "slideright", "slideup", "slidedown", "circlecrop",
-                                  "rectcrop", "distance", "fadeblack", "fadewhite", "radial",
-                                  "smoothleft", "smoothright", "smoothup", "smoothdown", "circleopen",
-                                  "circleclose", "vertopen", "vertclose", "horzopen", "horzclose",
-                                  "dissolve", "pixelize", "diagtl", "diagtr", "diagbl", "diagbr",
-                                  "hlslice", "hrslice", "vuslice", "vdslice", "hblur", "fadegrays",
-                                  "wipetl", "wipetr", "wipebl", "wipebr", "squeezeh", "squeezev",
-                                  "zoomin", "fadefast", "fadeslow", "hlwind", "hrwind", "vuwind",
-                                  "vdwind", "coverleft", "coverright", "coverup", "coverdown",
-                                  "revealleft", "revealright", "revealup", "revealdown"
+                                  "fade",
+                                  "wipeleft",
+                                  "wiperight",
+                                  "wipeup",
+                                  "wipedown",
+                                  "slideleft",
+                                  "slideright",
+                                  "slideup",
+                                  "slidedown",
+                                  "circlecrop",
+                                  "rectcrop",
+                                  "distance",
+                                  "fadeblack",
+                                  "fadewhite",
+                                  "radial",
+                                  "smoothleft",
+                                  "smoothright",
+                                  "smoothup",
+                                  "smoothdown",
+                                  "circleopen",
+                                  "circleclose",
+                                  "vertopen",
+                                  "vertclose",
+                                  "horzopen",
+                                  "horzclose",
+                                  "dissolve",
+                                  "pixelize",
+                                  "diagtl",
+                                  "diagtr",
+                                  "diagbl",
+                                  "diagbr",
+                                  "hlslice",
+                                  "hrslice",
+                                  "vuslice",
+                                  "vdslice",
+                                  "hblur",
+                                  "fadegrays",
+                                  "wipetl",
+                                  "wipetr",
+                                  "wipebl",
+                                  "wipebr",
+                                  "squeezeh",
+                                  "squeezev",
+                                  "zoomin",
+                                  "fadefast",
+                                  "fadeslow",
+                                  "hlwind",
+                                  "hrwind",
+                                  "vuwind",
+                                  "vdwind",
+                                  "coverleft",
+                                  "coverright",
+                                  "coverup",
+                                  "coverdown",
+                                  "revealleft",
+                                  "revealright",
+                                  "revealup",
+                                  "revealdown"
                                 ]
                               },
                               "transition_length": {
