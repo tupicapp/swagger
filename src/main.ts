@@ -8,10 +8,11 @@ import { SwaggerUIBundle, SwaggerUIStandalonePreset } from "swagger-ui-dist"
 SwaggerUIBundle({
     dom_id: '#swagger-ui',
     urls: [
+        {url: "https://api.gibical.app/docs/api.json", name: "Core (v2.1)"},
         {url: "/configs/core-v2.json", name: "Core (v2)"},
         {url: "/configs/blog-v1.json", name: "Blog (v1)"},
     ],
-    "urls.primaryName": "Core (v1)",
+    "urls.primaryName": "Core (v2.1)",
     presets: [
         SwaggerUIBundle.presets.apis,
         SwaggerUIStandalonePreset
