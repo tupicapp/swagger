@@ -27,7 +27,13 @@ jobs:
       - name: Build the Vite app
         run: yarn build
 
-      # Step 5: Verify dist directory is generated
+      # Step 5: Debug workspace after build
+      - name: Debug workspace after build
+        run: |
+          echo "Listing contents of workspace after build:"
+          ls -alh ./dist
+
+      # Step 6: Verify dist directory is generated
       - name: Verify dist directory
         run: |
           if [ ! -d "./dist" ]; then
@@ -36,7 +42,7 @@ jobs:
           fi
           echo "Dist directory exists!"
 
-      # Step 6: Deploy to the server
+      # Step 7: Deploy to the server
       - name: Deploy
         uses: appleboy/ssh-action@master
         with:
@@ -47,13 +53,10 @@ jobs:
           script: |
             cd /srv/swagger
             git pull
+            echo "Listing contents of the dist directory in GitHub workspace:"
+            ls -alh ${{ github.workspace }}/dist
             if [ ! -d "${{ github.workspace }}/dist" ]; then
               echo "Error: dist directory not found in GitHub workspace!"
-              exit 1
-            fi
-            # Check if dist directory exists locally
-            if [ ! -d "./dist" ]; then
-              echo "Error: dist directory not found after build!"
               exit 1
             fi
             rm -rf ./dist
