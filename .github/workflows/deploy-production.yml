@@ -16,19 +16,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: yarn install
 
-      # Step 3: Build the project
+      # Step 4: Build the project
       - name: Build the project
         run: |
           yarn build
           echo "Listing contents of the workspace after build:"
           ls -alh ./dist  # List contents of the dist directory to confirm it's created
 
-      # Step 4: Deploy to the server via SSH
+      # Step 5: Deploy to the server via SSH
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
