@@ -36,5 +36,12 @@ jobs:
           script: |
             cd /srv/swagger
             git pull
+            # Ensure dist exists in the runner
+            if [ ! -d ${{ github.workspace }}/dist ]; then
+              echo "Error: dist directory not found in GitHub workspace!"
+              exit 1
+            fi
+            # Deploy the new build
             rm -rf ./dist
             cp -r ${{ github.workspace }}/dist ./dist
+      
