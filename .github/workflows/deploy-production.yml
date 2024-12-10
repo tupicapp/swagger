@@ -35,12 +35,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /srv/swagger
-            git reset --hard HEAD^
             git pull
-            # Ensure dist exists before deployment
-            if [ ! -d ${{ github.workspace }}/dist ]; then
-              echo "Error: dist directory not found!"
-              exit 1
-            fi
             rm -rf ./dist
-            mv ${{ github.workspace }}/dist ./dist
+            cp -r ${{ github.workspace }}/dist ./dist
