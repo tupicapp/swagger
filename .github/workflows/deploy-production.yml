@@ -27,11 +27,14 @@ jobs:
       - name: Build the Vite app
         run: yarn build
 
-      # Step 5: Debug build process
-      - name: Debug build process
+      # Step 5: Verify dist directory is generated
+      - name: Verify dist directory
         run: |
-          echo "Checking workspace contents..."
-          ls -R ${{ github.workspace }}
+          if [ ! -d "dist" ]; then
+            echo "Error: dist directory not found!"
+            exit 1
+          fi
+          echo "Dist directory exists!"
 
       # Step 6: Deploy to the server
       - name: Deploy
@@ -44,7 +47,7 @@ jobs:
           script: |
             cd /srv/swagger
             git pull
-            if [ ! -d ${{ github.workspace }}/dist ]; then
+            if [ ! -d "${{ github.workspace }}/dist" ]; then
               echo "Error: dist directory not found in GitHub workspace!"
               exit 1
             fi
