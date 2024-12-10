@@ -29,6 +29,13 @@ jobs:
           echo "Listing contents of the workspace after build:"
           ls -alh ./dist
 
+      - name: Listing files in the workspace after build
+        run: |
+          echo "Listing contents of the workspace:"
+          ls -alh ./dist
+          # Optionally, list all files in the workspace
+          ls -alh
+
       # Step 5: Deploy to the server via SSH
       - name: Deploy to server
         uses: appleboy/ssh-action@master
@@ -39,14 +46,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /srv/swagger
-            git pull
-            echo "Listing contents of the dist directory in GitHub workspace:"
-            ls -alh ./dist || echo "dist directory not found"
+            ls -alh
+            # Verify dist directory exists
             if [ ! -d "./dist" ]; then
-              echo "Error: dist directory not found!"
-              exit 1
+            echo "Error: dist directory not found!"
+            exit 1
             fi
+            # Clean up old dist directory if exists
             rm -rf ./dist
             echo "Copying dist directory to the server..."
-            cp -r ./dist /srv/swagger/dist
+            cp -r /home/runner/work/swagger/swagger/dist /srv/swagger/dist
             echo "Deployment complete."
