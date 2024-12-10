@@ -14,7 +14,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
           cache: 'npm'
 
       - name: Install dependencies
@@ -24,7 +24,9 @@ jobs:
         run: npm run build
 
       - name: Verify build output
-        run: ls -la ${{ github.workspace }}/dist
+        run: |
+          echo "Checking dist folder contents..."
+          ls -R ${{ github.workspace }}/dist || echo "dist folder not found!"
 
       - name: Deploy
         uses: appleboy/ssh-action@master
@@ -36,7 +38,7 @@ jobs:
           script: |
             cd /srv/swagger
             git pull
-            # Ensure dist exists in the runner
+            # Ensure dist exists before deployment
             if [ ! -d ${{ github.workspace }}/dist ]; then
               echo "Error: dist directory not found in GitHub workspace!"
               exit 1
