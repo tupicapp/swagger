@@ -27,13 +27,13 @@ jobs:
         run: |
           yarn build
           echo "Listing contents of the workspace after build:"
-          ls -alh ./dist  # List contents of the dist directory to confirm it's created
+          ls -alh ./dist
 
       # Step 5: Deploy to the server via SSH
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
+          host: ${{ vars.SERVER_HOST }}
           port: 22
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
