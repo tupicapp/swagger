@@ -8,45 +8,31 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Step 1: Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js and install dependencies
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: 20
-          cache: 'yarn'
+          node-version: '16'
 
-      # Step 3: Install dependencies with Yarn
       - name: Install dependencies
         run: yarn install
 
-      # Step 4: Build the Vite app
-      - name: Build the Vite app
-        run: yarn build
-
-      # Step 5: Debug workspace after build
-      - name: Debug workspace after build
+      # Step 3: Build the project
+      - name: Build the project
         run: |
-          echo "Listing contents of workspace after build:"
-          ls -alh ./dist
+          yarn build
+          echo "Listing contents of the workspace after build:"
+          ls -alh ./dist  # List contents of the dist directory to confirm it's created
 
-      # Step 6: Verify dist directory is generated
-      - name: Verify dist directory
-        run: |
-          if [ ! -d "./dist" ]; then
-            echo "Error: dist directory not found!"
-            exit 1
-          fi
-          echo "Dist directory exists!"
-
-      # Step 7: Deploy to the server
-      - name: Deploy
+      # Step 4: Deploy to the server via SSH
+      - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ vars.SERVER_HOST }}
+          host: ${{ secrets.SERVER_HOST }}
           port: 22
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -54,10 +40,12 @@ jobs:
             cd /srv/swagger
             git pull
             echo "Listing contents of the dist directory in GitHub workspace:"
-            ls -alh ${{ github.workspace }}/dist
-            if [ ! -d "${{ github.workspace }}/dist" ]; then
-              echo "Error: dist directory not found in GitHub workspace!"
+            ls -alh ./dist || echo "dist directory not found"
+            if [ ! -d "./dist" ]; then
+              echo "Error: dist directory not found!"
               exit 1
             fi
             rm -rf ./dist
-            cp -r ${{ github.workspace }}/dist ./dist
+            echo "Copying dist directory to the server..."
+            cp -r ./dist /srv/swagger/dist
+            echo "Deployment complete."
