@@ -3,12 +3,14 @@ import 'swagger-ui-dist/swagger-ui.css';
 import './css/swagger.css';
 
 //js
-import { SwaggerUIBundle, SwaggerUIStandalonePreset } from "swagger-ui-dist"
+import {SwaggerUIBundle, SwaggerUIStandalonePreset} from "swagger-ui-dist"
+
+const coreUrl = import.meta.env.VITE_CORE_URL;
 
 SwaggerUIBundle({
     dom_id: '#swagger-ui',
     urls: [
-        {url: "https://api.gibical.app/docs/api.json", name: "Core (v2.1)"},
+        {url: coreUrl, name: "Core (v2.1)"},
         {url: "/configs/core-v2.json", name: "Core (v2)"},
         {url: "/configs/blog-v1.json", name: "Blog (v1)"},
         {url: "/configs/oauth-server.json", name: "OAuth"},

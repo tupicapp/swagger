@@ -24,6 +24,8 @@ jobs:
 
       # Step 4: Build the project
       - name: Build the project
+        env:
+          VITE_API_URL: https://api.gibical.app/docs/api.json
         run: yarn build
 
       # Step 5: Upload dist directory to the server using scp
@@ -35,4 +37,4 @@ jobs:
           port: 22
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: ./dist/
-          target: /srv/swagger/dist/
+          target: /srv/swagger/
