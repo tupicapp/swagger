@@ -48,14 +48,12 @@ jobs:
             cd /srv/swagger
             echo "Listing contents of the current directory:"
             ls -alh
-            # Check if the dist directory exists
-            if [ ! -d "/home/runner/work/swagger/swagger/dist" ]; then
+            # Ensure dist directory exists in the workspace before deploying
+            if [ ! -d "/srv/swagger/dist" ]; then
             echo "Error: dist directory not found!"
             exit 1
             fi
-            # Clean up old dist directory if exists on the server
+            # Remove old dist directory and deploy
             rm -rf ./dist
-            echo "Copying dist directory to the server..."
-            # Copy dist directory to the server
-            cp -r /home/runner/work/swagger/swagger/dist /srv/swagger/dist  # Adjust path to dist if needed
+            cp -r /home/runner/work/swagger/swagger/dist ./dist
             echo "Deployment complete."
