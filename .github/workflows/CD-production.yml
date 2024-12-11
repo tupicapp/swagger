@@ -34,6 +34,13 @@ jobs:
           ls -alh
 
       # Step 5: Deploy to the server via SSH
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ vars.SERVER_HOST }} >> ~/.ssh/known_hosts
+
       - name: Deploy Build Artifacts
         run: |
-          scp -i ${{ secrets.SSH_KEY }} -r ./dist/* root@${{ vars.SERVER_HOST }}:/srv/swagger/dist
+          scp -i ~/.ssh/id_rsa -r ./dist/* root@${{ vars.SERVER_HOST }}:/srv/swagger/dist
