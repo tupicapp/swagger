@@ -24,16 +24,13 @@ jobs:
 
       # Step 4: Build the project
       - name: Build the project
-        run: |
-          yarn build
-          echo "Listing contents of the workspace after build:"
-          ls -alh ./dist
+        run: yarn build
 
       - name: Listing files in the workspace after build
         run: |
           echo "Listing contents of the workspace:"
           ls -alh ./dist
-          # Optionally, list all files in the workspace
+          echo "list all files in the workspace"
           ls -alh
 
       # Step 5: Deploy to the server via SSH
@@ -53,7 +50,6 @@ jobs:
             echo "Error: dist directory not found!"
             exit 1
             fi
-            # Remove old dist directory and deploy
             rm -rf ./dist
-            cp -r /home/runner/work/swagger/swagger/dist ./dist
+            rsync -avz /home/runner/work/swagger/swagger/dist/ ./dist
             echo "Deployment complete."
