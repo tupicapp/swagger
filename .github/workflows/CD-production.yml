@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Debug Environment
+        run: echo "VITE_API_URL=${VITE_API_URL}"
+        env:
+          VITE_API_URL: https://api.gibical.app/docs/api.json
+
       # Step 4: Build the project
       - name: Build the project
         env:
