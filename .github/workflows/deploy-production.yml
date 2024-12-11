@@ -34,22 +34,6 @@ jobs:
           ls -alh
 
       # Step 5: Deploy to the server via SSH
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ vars.SERVER_HOST }}
-          port: 22
-          username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /srv/swagger
-            echo "Listing contents of the current directory:"
-            ls -alh
-            # Ensure dist directory exists in the workspace before deploying
-            if [ ! -d "/srv/swagger/dist" ]; then
-            echo "Error: dist directory not found!"
-            exit 1
-            fi
-            rm -rf ./dist
-            rsync -avz /home/runner/work/swagger/swagger/dist/ ./dist
-            echo "Deployment complete."
+      - name: Deploy Build Artifacts
+        run: |
+          scp -i ${{ secrets.SSH_KEY }} -r ./dist/* root@${{ vars.SERVER_HOST }}:/srv/swagger/dist
