@@ -19,6 +19,7 @@ body {
 .swagger-ui {
     color: #dddfdd;
     background: #030340;
+    padding-top: 30px;
 }
 
 .swagger-ui .scheme-container, .swagger-ui .topbar {
