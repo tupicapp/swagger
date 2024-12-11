@@ -25,7 +25,7 @@ jobs:
       # Step 4: Build the project
       - name: Build the project
         env:
-          VITE_CORE_URL: https://api.gibical.app/docs/api.json
+          VITE_CORE_URL: https://api.gibical.app/swagger/api.json
         run: yarn build
 
       # Step 5: Upload dist directory to the server using scp
