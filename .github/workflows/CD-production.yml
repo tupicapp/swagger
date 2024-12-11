@@ -26,21 +26,13 @@ jobs:
       - name: Build the project
         run: yarn build
 
-      - name: Listing files in the workspace after build
-        run: |
-          echo "Listing contents of the workspace:"
-          ls -alh ./dist
-          echo "list all files in the workspace"
-          ls -alh
-
-      # Step 5: Deploy to the server via SSH
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ vars.SERVER_HOST }} >> ~/.ssh/known_hosts
-
+      # Step 5: Upload dist directory to the server using scp
       - name: Deploy Build Artifacts
-        run: |
-          scp -i ~/.ssh/id_rsa -r ./dist/* root@${{ vars.SERVER_HOST }}:/srv/swagger/dist
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          username: root
+          port: 22
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: ./dist/
+          target: /srv/swagger/dist/
