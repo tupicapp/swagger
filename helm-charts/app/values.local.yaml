@@ -1,0 +1,9 @@
+replicaCount: 1
+
+image:
+  app:
+    pullPolicy: "Never"
+
+ingress:
+  controller: nginx
+  host: swagger.gibical.local

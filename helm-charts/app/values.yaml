@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  app:
+    repository: "992382452361.dkr.ecr.eu-central-1.amazonaws.com/swagger/app"
+    tag: "latest"
+    pullPolicy: "Always"
+
+imagePullSecret:
+
+ingress:
+  controller: "alb"
+  certificationArn: "arn:aws:acm:eu-central-1:992382452361:certificate/3ab3bfef-af41-4916-ba63-331b7a760dd4"
+  host:
+
+resources:
+  requests:
+    cpu: "1"
+    memory: "512Mi"
+  limits:
+    cpu: "2"
+    memory: "2000Mi"
+
+env:
+  variables:
+    SAMPLE: "sample"
+
