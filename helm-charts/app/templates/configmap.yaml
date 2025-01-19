@@ -8,4 +8,6 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  SAMPLE: {{ .Values.env.variables.SAMPLE | quote }}
+{{- range $key, $value := .Values.env.variables }}
+  {{ $key }}: {{ $value | quote }}
+{{- end }}
