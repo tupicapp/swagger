@@ -16,9 +16,9 @@ jobs:
       region: ${{ vars.PROD_REGION }}
       dockerfile: Dockerfile
       docker_args: |
-        --build-arg CORE_URL=${{ vars.CORE_URL }}
-        --build-arg OAUTH_URL=${{ vars.OAUTH_URL }}
-        --build-arg BLOG_URL=${{ vars.BLOG_URL }}
+        --build-arg CORE_URL=${{ vars.CORE_URL }} \
+        --build-arg OAUTH_URL=${{ vars.OAUTH_URL }} \
+        --build-arg BLOG_URL=${{ vars.BLOG_URL }} \
 
   deploy:
     name: Deploy Prod
