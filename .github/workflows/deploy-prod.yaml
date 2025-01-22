@@ -12,9 +12,13 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
     with:
-      dockerfile: Dockerfile
       registry_path: ${{ vars.REGISTRY_PATH }}
       region: ${{ vars.PROD_REGION }}
+      dockerfile: Dockerfile
+      docker_args: |
+        --build-arg CORE_URL=${{ vars.CORE_URL }}
+        --build-arg OAUTH_URL=${{ vars.OAUTH_URL }}
+        --build-arg BLOG_URL=${{ vars.BLOG_URL }}
 
   deploy:
     name: Deploy Prod

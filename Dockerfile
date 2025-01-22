@@ -1,6 +1,16 @@
 # Stage 1: Build the application
 FROM node:20 AS build
 
+# Define build arguments
+ARG CORE_URL
+ARG OAUTH_URL
+ARG BLOG_URL
+
+# Set environment variables based on build arguments
+ENV VITE_CORE_URL=$CORE_URL
+ENV VITE_OAUTH_URL=$OAUTH_URL
+ENV VITE_BLOG_URL=$BLOG_URL
+
 # Set the working directory
 WORKDIR /app
 
