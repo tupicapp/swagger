@@ -17,9 +17,11 @@ resources:
   requests:
     cpu: "10m"
     memory: "16Mi"
+    ephemeral-storage: "32Mi"
   limits:
     cpu: "50m"
     memory: "64Mi"
+    ephemeral-storage: "64Mi"
 
 env:
   variables:
