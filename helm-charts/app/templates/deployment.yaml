@@ -54,7 +54,7 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 5
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 10
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}
