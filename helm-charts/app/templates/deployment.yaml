@@ -24,7 +24,7 @@ spec:
         - name: {{ .Values.imagePullSecret }}
       {{- end }}
       containers:
-        - name: app
+        - name: {{ .Chart.Name }}-app
           image: "{{ .Values.image.app.repository }}:{{ .Values.image.app.tag }}"
           imagePullPolicy: {{ .Values.image.app.pullPolicy }}
           resources:
