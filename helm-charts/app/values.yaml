@@ -15,13 +15,13 @@ ingress:
 
 resources:
   requests:
-    cpu: "10m"
-    memory: "16Mi"
-    ephemeral-storage: "32Mi"
+    cpu: "5m"
+    memory: "5Mi"
+    ephemeral-storage: "25Mi"
   limits:
-    cpu: "50m"
-    memory: "64Mi"
-    ephemeral-storage: "64Mi"
+    cpu: "10m"
+    memory: "10Mi"
+    ephemeral-storage: "35Mi"
 
 env:
   variables:
