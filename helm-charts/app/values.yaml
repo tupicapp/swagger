@@ -13,6 +13,14 @@ ingress:
   certificationArn: "arn:aws:acm:eu-central-1:992382452361:certificate/63b3df72-af45-4232-8c80-00379b018351"
   host:
 
+hpa:
+  minReplicas: 1
+  maxReplicas: 5
+  cpu:
+    target: 80
+  memory:
+    target: 80
+
 resources:
   requests:
     cpu: "5m"
