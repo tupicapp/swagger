@@ -1,6 +1,12 @@
 html {
     box-sizing: border-box;
     overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+    display: none;
 }
 
 *, *:before, *:after {
@@ -9,7 +15,7 @@ html {
 
 body {
     margin: 0;
-    background: #030340;
+    background: #000018;
 }
 
 .topbar-wrapper .link, .info, .information-container {
@@ -18,12 +24,12 @@ body {
 
 .swagger-ui {
     color: #dddfdd;
-    background: #030340;
+    background: #000018;
     padding-top: 30px;
 }
 
 .swagger-ui .scheme-container, .swagger-ui .topbar {
-    background: #070753;
+    background: #000018;
 }
 
 .swagger-ui .info a {
@@ -40,6 +46,7 @@ body {
 
 .swagger-ui .opblock-tag {
     color: #ffffff;
+    background-color: #010b24;
 }
 
 .swagger-ui .opblock-tag small {
@@ -119,7 +126,7 @@ thead tr td, .swagger-ui table thead tr th {
 }
 
 .swagger-ui .dialog-ux .modal-ux {
-    background: #030340;
+    background: #000018;
 }
 
 .swagger-ui .dialog-ux .modal-ux-header h3 {
