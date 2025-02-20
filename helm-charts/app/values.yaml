@@ -27,9 +27,9 @@ resources:
     memory: "10Mi"
     ephemeral-storage: "25Mi"
   limits:
-    cpu: "15m"
-    memory: "15Mi"
-    ephemeral-storage: "35Mi"
+    cpu: "12m"
+    memory: "12Mi"
+    ephemeral-storage: "30Mi"
 
 env:
   variables:
