@@ -15,7 +15,7 @@ ingress:
 
 hpa:
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 1
   cpu:
     target: 80
   memory:
