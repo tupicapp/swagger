@@ -9,7 +9,7 @@ image:
 imagePullSecret:
 
 ingress:
-  controller: "nginx"
+  controller: "alb"
   certificationArn: "arn:aws:acm:eu-central-1:992382452361:certificate/63b3df72-af45-4232-8c80-00379b018351"
   host:
 
