@@ -28,12 +28,12 @@ spec:
           image: "{{ .Values.image.app.repository }}:{{ .Values.image.app.tag }}"
           imagePullPolicy: {{ .Values.image.app.pullPolicy }}
           resources:
-            limits:
-              cpu: {{ .Values.resources.limits.cpu }}
-              memory: {{ .Values.resources.limits.memory }}
             requests:
               cpu: {{ .Values.resources.requests.cpu }}
               memory: {{ .Values.resources.requests.memory }}
+{{/*            limits:*/}}
+{{/*              cpu: {{ .Values.resources.limits.cpu }}*/}}
+{{/*              memory: {{ .Values.resources.limits.memory }}*/}}
           ports:
             - containerPort: 80
           livenessProbe:
