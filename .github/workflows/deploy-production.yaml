@@ -1,0 +1,36 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build Production
+    uses: gibical/infra/.github/workflows/shared-eks-build.yaml@main
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+    with:
+      registry_path: ${{ vars.PRODUCTION_REGISTRY_PATH }}
+      region: ${{ vars.PRODUCTION_REGION }}
+      dockerfile: Dockerfile
+      docker_args: |
+        --build-arg CORE_URL=${{ vars.PRODUCTION_CORE_URL }} \
+        --build-arg OAUTH_URL=${{ vars.PRODUCTION_OAUTH_URL }} \
+        --build-arg BLOG_URL=${{ vars.PRODUCTION_BLOG_URL }} \
+
+  deploy:
+    name: Deploy Production
+    uses: gibical/infra/.github/workflows/shared-eks-deploy.yaml@main
+    needs: build
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.PRODUCTION_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY }}
+    with:
+      name:  ${{ github.event.repository.name }}
+      cluster: ${{ vars.PRODUCTION_CLUSTER }}
+      region: ${{ vars.PRODUCTION_REGION }}
+      namespace: ${{ vars.PRODUCTION_NAMESPACE }}
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      values_file: 'values.yaml'

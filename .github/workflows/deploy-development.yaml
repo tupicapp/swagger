@@ -1,0 +1,36 @@
+name: Deploy Development
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  build:
+    name: Build Development
+    uses: gibical/infra/.github/workflows/shared-eks-build.yaml@main
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
+    with:
+      registry_path: ${{ vars.DEVELOPMENT_REGISTRY_PATH }}
+      region: ${{ vars.DEVELOPMENT_REGION }}
+      dockerfile: Dockerfile
+      docker_args: |
+        --build-arg CORE_URL=${{ vars.DEVELOPMENT_CORE_URL }} \
+        --build-arg OAUTH_URL=${{ vars.DEVELOPMENT_OAUTH_URL }} \
+        --build-arg BLOG_URL=${{ vars.DEVELOPMENT_BLOG_URL }} \
+
+  deploy:
+    name: Deploy Development
+    uses: gibical/infra/.github/workflows/shared-eks-deploy.yaml@main
+    needs: build
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
+    with:
+      name:  ${{ github.event.repository.name }}
+      cluster: ${{ vars.DEVELOPMENT_CLUSTER }}
+      region: ${{ vars.DEVELOPMENT_REGION }}
+      namespace: ${{ vars.DEVELOPMENT_NAMESPACE }}
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      values_file: 'values.development.yaml'
