@@ -7,7 +7,7 @@ import {SwaggerUIBundle, SwaggerUIStandalonePreset} from "swagger-ui-dist"
 
 const coreUrl = import.meta.env.VITE_CORE_URL ||  "https://api.gibical.app/docs/api.json";
 const oauthUrl = import.meta.env.VITE_OAUTH_URL || "https://api.gibical.app/swagger/oauth.json";
-const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1.json";
+const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1-development.json";
 
 SwaggerUIBundle({
     dom_id: '#swagger-ui',

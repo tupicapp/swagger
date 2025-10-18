@@ -33,5 +33,7 @@ resources:
 
 env:
   variables:
-    SAMPLE: "sample"
+    VITE_CORE_URL: "https://api.gibical.app/docs/api.json"
+    VITE_OAUTH_URL: "https://api.gibical.app/swagger/oauth.json"
+    VITE_BLOG_URL: "/configs/blog-v1-development.json"
 
