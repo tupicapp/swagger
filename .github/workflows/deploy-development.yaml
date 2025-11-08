@@ -4,6 +4,9 @@ on:
   push:
     branches: [ dev ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Development
@@ -19,3 +22,25 @@ jobs:
         --build-arg CORE_URL=${{ vars.DEVELOPMENT_CORE_URL }} \
         --build-arg OAUTH_URL=${{ vars.DEVELOPMENT_OAUTH_URL }} \
         --build-arg BLOG_URL=${{ vars.DEVELOPMENT_BLOG_URL }} \
+
+  update-manifest:
+    name: Update Image Tag
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Update values.development.yaml
+        run: |
+          sed -i "s|tag:.*|tag: \"${{ needs.build.outputs.image_tag }}\"|g" helm-charts/app/values.development.yaml
+          
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add helm-charts/app/values.development.yaml
+          git commit -m "chore: update image tag to ${{ needs.build.outputs.image_tag }}" || echo "No changes to commit"
+          git push
