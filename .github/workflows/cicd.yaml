@@ -1,0 +1,69 @@
+name: Build App
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
+    uses: gibical/infra/.github/workflows/shared-eks-build.yaml@main
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_ACCESS_KEY_ID || secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY || secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
+    with:
+      registry_path: ${{ github.ref_name == 'main' && vars.PRODUCTION_REGISTRY_PATH || vars.DEVELOPMENT_REGISTRY_PATH }}
+      region: ${{ github.ref_name == 'main' && vars.PRODUCTION_REGION || vars.DEVELOPMENT_REGION }}
+      dockerfile: Dockerfile
+      runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
+      docker_args: >-
+        --build-arg CORE_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_CORE_URL || vars.DEVELOPMENT_CORE_URL }}
+        --build-arg OAUTH_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_OAUTH_URL || vars.DEVELOPMENT_OAUTH_URL }}
+        --build-arg BLOG_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_BLOG_URL || vars.DEVELOPMENT_BLOG_URL }}
+
+  update-manifest:
+    name: Update Helm Manifest
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Update Helm values
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            FILE="helm-charts/app/values.yaml"
+          else
+            FILE="helm-charts/app/values.development.yaml"
+          fi
+          echo "Updating image tag in $FILE ..."
+          sed -i "s|tag:.*|tag: \"${{ needs.build.outputs.image_tag }}\"|g" $FILE
+
+      - name: Commit and push using original commit message
+        run: |
+          # Get original commit info
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_AUTHOR_NAME=$(git log -1 --pretty="%an")
+          COMMIT_AUTHOR_EMAIL=$(git log -1 --pretty="%ae")
+
+          # Configure Git with original author
+          git config user.name "$COMMIT_AUTHOR_NAME"
+          git config user.email "$COMMIT_AUTHOR_EMAIL"
+
+          # Commit only if file changed
+          git add helm-charts/app/
+          if git diff --cached --quiet; then
+            echo "✅ No changes to commit"
+          else
+            echo "📦 Committing Helm update for ${{ github.ref_name }}..."
+            git commit -m "$COMMIT_MSG"
+            git push
+          fi
