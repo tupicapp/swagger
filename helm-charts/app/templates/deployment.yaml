@@ -4,20 +4,14 @@ metadata:
   name: {{ .Release.Name }}
   annotations:
     checksum/config: {{ .Files.Get "configmap.yaml" | sha256sum }}
-  labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  labels: {{ include "app.labels" . | nindent 4 }}
 spec:
   selector:
-    matchLabels:
-      app: {{ .Chart.Name }}
+    matchLabels: {{ include "app.selectorLabels" . | nindent 6 }}
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
-      labels:
-        app: {{ .Chart.Name }}
+      labels: {{ include "app.labels" . | nindent 8 }}
     spec:
       {{- if .Values.imagePullSecret }}
       imagePullSecrets:

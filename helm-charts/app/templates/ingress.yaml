@@ -11,11 +11,7 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.certificationArn }}
     {{- end }}
-  labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  labels: {{ include "app.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.ingress.controller }}
   rules:
