@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   app:
     repository: "992382452361.dkr.ecr.eu-west-1.amazonaws.com/swagger/production"
-    tag: "cfacca1-20251112142020"
+    tag: "8d38eff-20251126130616"
     pullPolicy: "Always"
 
 imagePullSecret:
@@ -33,7 +33,7 @@ resources:
 
 env:
   variables:
-    VITE_CORE_URL: "https://api.gibical.com/docs/api.json"
+    VITE_CORE_URL: "https://api.gibical.com/swagger/api.json"
     VITE_OAUTH_URL: "https://api.gibical.com/swagger/oauth.json"
     VITE_BLOG_URL: "/configs/blog-v1-production.json"
 
