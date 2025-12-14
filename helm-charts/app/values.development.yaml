@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   app:
     repository: "992382452361.dkr.ecr.eu-central-1.amazonaws.com/swagger/app"
-    tag: "de54b35-20251112141920"
+    tag: "9734035-20251213125214"
     pullPolicy: "Always"
 
 imagePullSecret:
