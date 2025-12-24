@@ -2,11 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}
-  labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  labels: {{ include "app.labels" . | nindent 4 }}
 data:
 {{- range $key, $value := .Values.env.variables }}
   {{ $key }}: {{ $value | quote }}
