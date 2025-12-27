@@ -10,7 +10,7 @@ imagePullSecret:
 
 ingress:
   controller: "alb"
-  certificationArn: "arn:aws:acm:eu-west-1:992382452361:certificate/9a499a45-2e17-44ff-9fd0-76d5ade2da79"
+  certificationArn: ""
   host:
 
 hpa:
