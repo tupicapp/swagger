@@ -18,6 +18,21 @@ body {
     background: #000018;
 }
 
+html.dark-mode .swagger-ui {
+    background: #000018;
+}
+
+html.dark-mode .swagger-ui .scheme-container {
+    background: #000018;
+}
+html.dark-mode .swagger-ui .topbar {
+    background: #000018;
+}
+
+.swagger-ui .topbar .dark-mode-toggle {
+    display: none;
+}
+
 .topbar-wrapper .link, .info, .information-container {
     display: none !important;
 }

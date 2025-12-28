@@ -13,7 +13,7 @@
   },
   "servers": [
     {
-      "url": "https://blog.gibical.app/v1"
+      "url": "https://blog.gibical.app/api"
     }
   ],
   "security": [

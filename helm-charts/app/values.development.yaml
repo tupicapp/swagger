@@ -3,14 +3,14 @@ replicaCount: 1
 image:
   app:
     repository: "992382452361.dkr.ecr.eu-central-1.amazonaws.com/swagger/app"
-    tag: "9734035-20251213125214"
+    tag: "c33b2fb-20251227115813"
     pullPolicy: "Always"
 
 imagePullSecret:
 
 ingress:
   controller: "alb"
-  certificationArn: "arn:aws:acm:eu-central-1:992382452361:certificate/63b3df72-af45-4232-8c80-00379b018351"
+  certificationArn: ""
   host:
 
 hpa:

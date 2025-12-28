@@ -2,14 +2,9 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ .Release.Name }}
-  labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+  labels: {{ include "app.labels" . | nindent 4 }}
 spec:
   maxUnavailable: 0
   unhealthyPodEvictionPolicy: AlwaysAllow
   selector:
-    matchLabels:
-      app: {{ .Chart.Name }}
+    matchLabels: {{ include "app.selectorLabels" . | nindent 6 }}
