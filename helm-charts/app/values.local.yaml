@@ -6,4 +6,4 @@ image:
 
 ingress:
   controller: nginx
-  host: swagger.gibical.local
+  host: swagger.tupic.local

@@ -2,18 +2,18 @@
   "openapi": "3.0.0",
   "info": {
     "version": "2.0.0",
-    "title": "Gibical Blog",
-    "description": "Gibical Blog APIs",
-    "termsOfService": "https://docs.gibical.app/",
+    "title": "Tupic Blog",
+    "description": "Tupic Blog APIs",
+    "termsOfService": "https://docs.tupic.com/",
     "contact": {
       "name": "Support",
-      "email": "info@gibical.app",
-      "url": "https://gibical.app/contact"
+      "email": "info@tupic.com",
+      "url": "https://tupic.com/contact"
     }
   },
   "servers": [
     {
-      "url": "https://blog.gibical.app/api"
+      "url": "https://blog.tupic.com/api"
     }
   ],
   "security": [
