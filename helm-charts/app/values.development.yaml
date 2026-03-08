@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   app:
-    repository: "992382452361.dkr.ecr.eu-central-1.amazonaws.com/swagger/app"
+    repository: "358438442054.dkr.ecr.us-east-1.amazonaws.com/development/swagger"
     tag: "c33b2fb-20251227115813"
     pullPolicy: "Always"
 
