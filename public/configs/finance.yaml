@@ -1,0 +1,301 @@
+openapi: 3.0.3
+info:
+  title: Cost SaaS API
+  description: |
+    SaaS Cost of Goods Sold (COGS) Analytics Platform API
+    
+    ## Power BI Integration
+    Use these endpoints for Power BI data sources:
+    - `/api/v1/reports/projects/{id}/monthly-summary` - Time series data
+    - `/api/v1/reports/projects/{id}/costs-flat` - Detailed cost data
+    - `/api/v1/reports/projects/{id}/category-summary` - Category breakdown
+    - `/api/v1/reports/projects/{id}/vendor-summary` - Vendor breakdown
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:5000
+    description: Development
+  - url: https://api.your-domain.com
+    description: Production
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    MonthlySummary:
+      type: object
+      properties:
+        project_id:
+          type: integer
+        project_name:
+          type: string
+        project_code:
+          type: string
+        period_year:
+          type: integer
+        period_month:
+          type: integer
+        period_date:
+          type: string
+          format: date
+        total_direct:
+          type: number
+        total_overhead:
+          type: number
+        total_variable:
+          type: number
+        total_fixed:
+          type: number
+        total_cogs:
+          type: number
+        item_count:
+          type: integer
+        currency:
+          type: string
+
+    CostFlat:
+      type: object
+      properties:
+        cost_id:
+          type: integer
+        project_id:
+          type: integer
+        project_name:
+          type: string
+        cost_name:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        period_year:
+          type: integer
+        period_month:
+          type: integer
+        period_date:
+          type: string
+          format: date
+        cost_type:
+          type: string
+          enum: [direct, overhead, variable, fixed]
+        vendor:
+          type: string
+        category_name:
+          type: string
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+
+  /api/v1/reports/projects/{project_id}/monthly-summary:
+    get:
+      tags: [Reports]
+      summary: Monthly COGS Summary (Power BI)
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: start_year
+          in: query
+          schema:
+            type: integer
+        - name: start_month
+          in: query
+          schema:
+            type: integer
+        - name: end_year
+          in: query
+          schema:
+            type: integer
+        - name: end_month
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Monthly summary data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MonthlySummary'
+                  count:
+                    type: integer
+
+  /api/v1/reports/projects/{project_id}/costs-flat:
+    get:
+      tags: [Reports]
+      summary: Flat Cost Data (Power BI)
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 1000
+      responses:
+        '200':
+          description: Flat cost data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CostFlat'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  pages:
+                    type: integer
+
+  /api/v1/reports/projects/{project_id}/category-summary:
+    get:
+      tags: [Reports]
+      summary: Category Summary
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category breakdown
+
+  /api/v1/reports/projects/{project_id}/vendor-summary:
+    get:
+      tags: [Reports]
+      summary: Vendor Summary
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: month
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Vendor breakdown
+
+  /api/v1/projects:
+    get:
+      tags: [Projects]
+      summary: List Projects
+      responses:
+        '200':
+          description: List of projects
+
+    post:
+      tags: [Projects]
+      summary: Create Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                code:
+                  type: string
+                currency:
+                  type: string
+      responses:
+        '201':
+          description: Project created
+
+  /api/v1/projects/{project_id}/costs:
+    get:
+      tags: [Costs]
+      summary: List Costs
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of costs
+
+    post:
+      tags: [Costs]
+      summary: Create Cost
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Cost created

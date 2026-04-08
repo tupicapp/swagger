@@ -1,0 +1,1565 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Tupic IAM (Keycloak) API",
+    "version": "1.0.0",
+    "description": "OpenAPI map for Keycloak routes used by Tupic IAM. Includes OIDC, account, and core admin APIs."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    },
+    {
+      "url": "https://iam.tupic.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "OIDC",
+      "description": "OpenID Connect endpoints for browser login, token exchange, token lifecycle, and user identity claims."
+    },
+    {
+      "name": "Account",
+      "description": "Self-service endpoints for the currently authenticated end-user."
+    },
+    {
+      "name": "Admin Realms",
+      "description": "Realm-level administration endpoints. Requires an admin access token with realm-management permissions."
+    },
+    {
+      "name": "Admin Users",
+      "description": "Administrative user management operations in a realm (create, read, update, delete, credentials)."
+    },
+    {
+      "name": "Admin Roles",
+      "description": "Realm role management and assignment APIs."
+    },
+    {
+      "name": "Admin Groups",
+      "description": "Group management APIs for organizing users and applying role/group policies."
+    },
+    {
+      "name": "Admin Clients",
+      "description": "Client (application/service) registration and lifecycle management APIs."
+    }
+  ],
+  "paths": {
+    "/realms/{realm}/.well-known/openid-configuration": {
+      "get": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Get OIDC discovery document",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "description": "Returns the OIDC discovery metadata for the realm, including authorization, token, userinfo, jwks_uri, issuer, and supported grant/response types. Use this as the source of truth for dynamic client configuration."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/auth": {
+      "get": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Authorization endpoint",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          {
+            "name": "response_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "code"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "openid profile email"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code_challenge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code_challenge_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "S256"
+            }
+          },
+          {
+            "name": "theme",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "light",
+                "dark"
+              ]
+            },
+            "description": "Custom login theme selector in your custom theme"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to login/consent"
+          }
+        },
+        "description": "Starts the browser authorization flow. Redirects the user to login/consent and ultimately back to redirect_uri with authorization code or tokens based on response_type. Supports PKCE and your custom login theme query parameter."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/token": {
+      "post": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Token endpoint",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "grant_type": {
+                    "type": "string",
+                    "example": "authorization_code"
+                  },
+                  "client_id": {
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "redirect_uri": {
+                    "type": "string"
+                  },
+                  "refresh_token": {
+                    "type": "string"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "scope": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token response"
+          }
+        },
+        "description": "Exchanges OAuth2/OIDC grants for tokens. Common grants: authorization_code, refresh_token, client_credentials, and password (if enabled). Use client authentication according to client type and policy."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/token/introspect": {
+      "post": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Introspect token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "client_id": {
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Introspection response"
+          }
+        },
+        "description": "Validates token status and metadata server-side. Returns active/inactive plus claims depending on token type and client permissions. Useful for confidential APIs that cannot validate JWTs locally."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/userinfo": {
+      "get": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Get userinfo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Userinfo"
+          }
+        },
+        "description": "Returns OIDC user claims for the subject represented by the bearer token. Claims depend on granted scopes and mapper configuration on the client/realm."
+      },
+      "post": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Get userinfo (POST)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Userinfo"
+          }
+        },
+        "description": "POST variant of userinfo endpoint for compatibility with clients/proxies. Semantics are equivalent to GET /userinfo."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/logout": {
+      "post": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Logout endpoint",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client_id": {
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "type": "string"
+                  },
+                  "refresh_token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Logged out"
+          }
+        },
+        "description": "Performs RP-initiated logout/session termination. Depending on parameters and session state, invalidates refresh token/session and clears SSO context."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/revoke": {
+      "post": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Revoke token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  },
+                  "token_type_hint": {
+                    "type": "string",
+                    "example": "refresh_token"
+                  },
+                  "client_id": {
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Revoked"
+          }
+        },
+        "description": "Revokes an issued token (typically refresh token) for a client, preventing further use. Use with confidential client credentials when required by policy."
+      }
+    },
+    "/realms/{realm}/protocol/openid-connect/certs": {
+      "get": {
+        "tags": [
+          "OIDC"
+        ],
+        "summary": "Get JWKS",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JWKS"
+          }
+        },
+        "description": "Returns the JSON Web Key Set (JWKS) for verifying realm-issued JWT signatures. Cache keys and rotate when key IDs change."
+      }
+    },
+    "/realms/{realm}/account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get current user profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current profile"
+          }
+        },
+        "description": "Self-service endpoint to retrieve the currently authenticated user's account profile representation. Requires user bearer access token."
+      },
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Update current user profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "description": "Self-service endpoint to update the authenticated user's profile fields/attributes. Validation and allowed fields depend on User Profile configuration in the realm."
+      },
+      "delete": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Delete current account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "description": "Deletes the currently authenticated user's account when self-deletion is permitted by realm policy. This action is destructive and should be confirmed in clients."
+      }
+    },
+    "/admin/realms": {
+      "get": {
+        "tags": [
+          "Admin Realms"
+        ],
+        "summary": "List realms",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Realm list"
+          }
+        },
+        "description": "Lists realms visible to the authenticated admin token. Requires realm-management/view-realm privileges in the admin realm context."
+      },
+      "post": {
+        "tags": [
+          "Admin Realms"
+        ],
+        "summary": "Create realm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "description": "Creates a new realm with supplied configuration payload. Requires high-privilege admin scope/role."
+      }
+    },
+    "/admin/realms/{realm}": {
+      "get": {
+        "tags": [
+          "Admin Realms"
+        ],
+        "summary": "Get realm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Realm"
+          }
+        },
+        "description": "Fetches complete realm representation including security and token policy settings."
+      },
+      "put": {
+        "tags": [
+          "Admin Realms"
+        ],
+        "summary": "Update realm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "description": "Updates realm-level configuration (token lifetimes, login options, email settings, themes, etc.)."
+      },
+      "delete": {
+        "tags": [
+          "Admin Realms"
+        ],
+        "summary": "Delete realm",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "description": "Deletes the target realm and all associated data. Use with extreme caution."
+      }
+    },
+    "/admin/realms/{realm}/users": {
+      "get": {
+        "tags": [
+          "Admin Users"
+        ],
+        "summary": "Search users",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "first",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User list"
+          }
+        },
+        "description": "Searches and paginates users in a realm. Query semantics vary by Keycloak version and can include partial matches."
+      },
+      "post": {
+        "tags": [
+          "Admin Users"
+        ],
+        "summary": "Create user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "description": "Creates a user account in the realm. Optional credentials/actions are typically set via follow-up admin endpoints."
+      }
+    },
+    "/admin/realms/{realm}/users/{userId}": {
+      "get": {
+        "tags": [
+          "Admin Users"
+        ],
+        "summary": "Get user by id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User"
+          }
+        },
+        "description": "Returns full user representation for a specific user ID."
+      },
+      "put": {
+        "tags": [
+          "Admin Users"
+        ],
+        "summary": "Update user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUser"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "description": "Updates a specific user (profile, flags, attributes, email verification status, etc.)."
+      },
+      "delete": {
+        "tags": [
+          "Admin Users"
+        ],
+        "summary": "Delete user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "description": "Deletes a specific user and related credentials/sessions per Keycloak behavior."
+      }
+    },
+    "/admin/realms/{realm}/users/{userId}/reset-password": {
+      "put": {
+        "tags": [
+          "Admin Users"
+        ],
+        "summary": "Reset user password",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "value"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "example": "password"
+                  },
+                  "value": {
+                    "type": "string"
+                  },
+                  "temporary": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Password reset"
+          }
+        },
+        "description": "Sets a new password credential for the user. temporary=true forces password update on next login."
+      }
+    },
+    "/admin/realms/{realm}/users/{userId}/role-mappings/realm": {
+      "get": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Get realm role mappings for user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role mappings"
+          }
+        },
+        "description": "Returns direct realm role mappings assigned to the user."
+      },
+      "post": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Add realm role mappings to user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RoleRepresentation"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Added"
+          }
+        },
+        "description": "Adds one or more realm roles to the user role mappings."
+      },
+      "delete": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Remove realm role mappings from user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/UserIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RoleRepresentation"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Removed"
+          }
+        },
+        "description": "Removes one or more realm roles from the user role mappings."
+      }
+    },
+    "/admin/realms/{realm}/roles": {
+      "get": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "List realm roles",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role list"
+          }
+        },
+        "description": "Lists realm roles defined in the realm."
+      },
+      "post": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Create realm role",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleRepresentation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "description": "Creates a realm role that can later be mapped to users/groups/clients."
+      }
+    },
+    "/admin/realms/{realm}/roles/{roleName}": {
+      "get": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Get role by name",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/RoleNameParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role"
+          }
+        },
+        "description": "Returns details of a realm role by role name."
+      },
+      "put": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Update role by name",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/RoleNameParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleRepresentation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "description": "Updates attributes/metadata of an existing realm role."
+      },
+      "delete": {
+        "tags": [
+          "Admin Roles"
+        ],
+        "summary": "Delete role by name",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/RoleNameParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "description": "Deletes the specified realm role by name."
+      }
+    },
+    "/admin/realms/{realm}/groups": {
+      "get": {
+        "tags": [
+          "Admin Groups"
+        ],
+        "summary": "List groups",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group list"
+          }
+        },
+        "description": "Lists top-level groups (and optionally subgroups depending on server behavior/settings)."
+      },
+      "post": {
+        "tags": [
+          "Admin Groups"
+        ],
+        "summary": "Create group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "description": "Creates a new group in the realm."
+      }
+    },
+    "/admin/realms/{realm}/groups/{groupId}": {
+      "get": {
+        "tags": [
+          "Admin Groups"
+        ],
+        "summary": "Get group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Group"
+          }
+        },
+        "description": "Fetches a specific group by ID, including metadata and hierarchy details."
+      },
+      "put": {
+        "tags": [
+          "Admin Groups"
+        ],
+        "summary": "Update group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "description": "Updates a group's mutable properties such as name."
+      },
+      "delete": {
+        "tags": [
+          "Admin Groups"
+        ],
+        "summary": "Delete group",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/GroupIdParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "description": "Deletes a group. Impact on subgroup/membership follows Keycloak semantics."
+      }
+    },
+    "/admin/realms/{realm}/clients": {
+      "get": {
+        "tags": [
+          "Admin Clients"
+        ],
+        "summary": "List clients",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "name": "clientId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client list"
+          }
+        },
+        "description": "Lists clients in the realm. Optional filters can reduce result set."
+      },
+      "post": {
+        "tags": [
+          "Admin Clients"
+        ],
+        "summary": "Create client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "clientId"
+                ],
+                "properties": {
+                  "clientId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "publicClient": {
+                    "type": "boolean"
+                  },
+                  "redirectUris": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "webOrigins": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "description": "Registers a new OIDC/SAML client (application or service) in the realm."
+      }
+    },
+    "/admin/realms/{realm}/clients/{clientUuid}": {
+      "get": {
+        "tags": [
+          "Admin Clients"
+        ],
+        "summary": "Get client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientUuidParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client"
+          }
+        },
+        "description": "Returns a client representation by internal UUID (not clientId string)."
+      },
+      "put": {
+        "tags": [
+          "Admin Clients"
+        ],
+        "summary": "Update client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientUuidParam"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Updated"
+          }
+        },
+        "description": "Updates client configuration including auth flows, redirects, and protocol settings."
+      },
+      "delete": {
+        "tags": [
+          "Admin Clients"
+        ],
+        "summary": "Delete client",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RealmParam"
+          },
+          {
+            "$ref": "#/components/parameters/ClientUuidParam"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          }
+        },
+        "description": "Deletes a client by internal UUID. Existing tokens/sessions may be affected."
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "RealmParam": {
+        "name": "realm",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "tupic"
+        }
+      },
+      "UserIdParam": {
+        "name": "userId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "RoleNameParam": {
+        "name": "roleName",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "GroupIdParam": {
+        "name": "groupId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "ClientUuidParam": {
+        "name": "clientUuid",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "schemas": {
+      "UserProfileUpdate": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Custom user attributes. Use keys such as cellphone, cellphone_verified_at, image_id, and status.",
+            "example": {
+              "cellphone": [
+                "+15551234567"
+              ],
+              "cellphone_verified_at": [
+                "2026-03-06T12:30:00Z"
+              ],
+              "image_id": [
+                "a1234567890"
+              ],
+              "status": [
+                "invited"
+              ]
+            }
+          }
+        }
+      },
+      "AdminUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "username": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Custom user attributes map. Includes cellphone, cellphone_verified_at, image_id, and status when present."
+          }
+        }
+      },
+      "RoleRepresentation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

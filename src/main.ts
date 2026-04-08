@@ -5,18 +5,22 @@ import './css/swagger.css';
 //js
 import {SwaggerUIBundle, SwaggerUIStandalonePreset} from "swagger-ui-dist"
 
-const coreUrl = import.meta.env.VITE_CORE_URL ||  "https://api.tupic.com/swagger/api.json";
-const oauthUrl = import.meta.env.VITE_OAUTH_URL || "https://api.tupic.com/swagger/oauth.json";
-const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1-development.json";
+const iamUrl = import.meta.env.VITE_IAM_URL || "/configs/iam.json";
+const liveCoreUrl = import.meta.env.VITE_LIVE_CORE_URL ||  "https://api.live.tupic.com/swagger/api.json";
+const tagCoreUrl = import.meta.env.VITE_TAG_CORE_URL ||  "https://api.tag.tupic.com/swagger/api.json";
+const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1-production.json";
+const financeUrl = import.meta.env.VITE_FINANCE_URL || "/configs/finance.yaml";
 
 SwaggerUIBundle({
     dom_id: '#swagger-ui',
     urls: [
-        {url: coreUrl, name: "Core (v2)"},
-        {url: oauthUrl, name: "OAuth (v2)"},
+        {url: iamUrl, name: "Iam"},
+        {url: liveCoreUrl, name: "Tupic Live (v2)"},
+        {url: tagCoreUrl, name: "Tupic Tag (v1)"},
         {url: blogUrl, name: "Blog (v1)"},
+        {url: financeUrl, name: "Finance (v1)"},
     ],
-    "urls.primaryName": "Core (v2)",
+    "urls.primaryName": "Tupic Live (v2)",
     presets: [
         SwaggerUIBundle.presets.apis,
         SwaggerUIStandalonePreset
