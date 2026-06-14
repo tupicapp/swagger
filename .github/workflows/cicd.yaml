@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
     name: Build ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
-    uses: tupicapp/infra/.github/workflows/shared-eks-build.yaml@main
+    uses: tupicapp/platform-infra/.github/workflows/shared-eks-build.yaml@main
     secrets:
       AWS_ACCESS_KEY_ID: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_ACCESS_KEY_ID || secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY || secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
