@@ -1,69 +1,67 @@
 name: Build App
-
 on:
   push:
     branches:
       - dev
       - main
-
+    paths-ignore:
+      - helm-charts/app/**
+  workflow_dispatch:
 permissions:
   contents: write
-
+  id-token: write
+  packages: read
+concurrency:
+  group: build-app-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
-    name: Build ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
-    uses: tupicapp/platform-infra/.github/workflows/shared-eks-build.yaml@main
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_ACCESS_KEY_ID || secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY || secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
+    name: Build ${{ github.ref_name == 'main' && 'production' || 'development' }}
+    uses: tupicapp/platform-workflows/.github/workflows/shared-eks-build.yaml@main
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
     with:
-      registry_path: ${{ github.ref_name == 'main' && vars.PRODUCTION_REGISTRY_PATH || vars.DEVELOPMENT_REGISTRY_PATH }}
-      region: ${{ github.ref_name == 'main' && vars.PRODUCTION_REGION || vars.DEVELOPMENT_REGION }}
       dockerfile: Dockerfile
+      environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
       runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
       docker_args: >-
         --build-arg CORE_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_CORE_URL || vars.DEVELOPMENT_CORE_URL }}
         --build-arg OAUTH_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_OAUTH_URL || vars.DEVELOPMENT_OAUTH_URL }}
         --build-arg BLOG_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_BLOG_URL || vars.DEVELOPMENT_BLOG_URL }}
-
   update-manifest:
     name: Update Helm Manifest
     needs: build
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-
-      - name: Update Helm values
+      - name: Update image tag
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            FILE="helm-charts/app/values.yaml"
-          else
-            FILE="helm-charts/app/values.development.yaml"
-          fi
-          echo "Updating image tag in $FILE ..."
-          sed -i "s|tag:.*|tag: \"${{ needs.build.outputs.image_tag }}\"|g" $FILE
-
-      - name: Commit and push using original commit message
+          FILE="${{ github.ref_name == 'main' && 'helm-charts/app/values.yaml' || 'helm-charts/app/values.development.yaml' }}"
+          TAG="${{ needs.build.outputs.image_tag }}"
+          echo "Updating $FILE with new tag: $TAG"
+          sed -i "s|tag:.*|tag: \"$TAG\"|g" "$FILE"
+      - name: Commit and push changes
         run: |
-          # Get original commit info
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          COMMIT_AUTHOR_NAME=$(git log -1 --pretty="%an")
-          COMMIT_AUTHOR_EMAIL=$(git log -1 --pretty="%ae")
-
-          # Configure Git with original author
-          git config user.name "$COMMIT_AUTHOR_NAME"
-          git config user.email "$COMMIT_AUTHOR_EMAIL"
-
-          # Commit only if file changed
+          AUTHOR_NAME=$(git log -1 --pretty="%an")
+          AUTHOR_EMAIL=$(git log -1 --pretty="%ae")
+          git config user.name "$AUTHOR_NAME"
+          git config user.email "$AUTHOR_EMAIL"
           git add helm-charts/app/
           if git diff --cached --quiet; then
-            echo "✅ No changes to commit"
+            echo "No changes in Helm values - skipping commit."
           else
-            echo "📦 Committing Helm update for ${{ github.ref_name }}..."
+            echo "Committing Helm update..."
             git commit -m "$COMMIT_MSG"
             git push
           fi
