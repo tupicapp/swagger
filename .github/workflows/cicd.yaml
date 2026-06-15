@@ -1,4 +1,4 @@
-name: Build App
+name: Build & Deploy App
 on:
   push:
     branches:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
   packages: read
 concurrency:
-  group: build-app-${{ github.ref }}
+  group: build-deploy-app-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -22,14 +22,14 @@ jobs:
       contents: read
       id-token: write
       packages: read
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_ACCESS_KEY_ID || secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY || secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
     with:
       dockerfile: Dockerfile
-      environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+      registry_path: 050617084006.dkr.ecr.us-west-1.amazonaws.com/${{ github.ref_name == 'main' && 'production' || 'development' }}
+      region: ${{ github.ref_name == 'main' && vars.PRODUCTION_REGION || vars.DEVELOPMENT_REGION }}
       runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
-      docker_args: >-
-        --build-arg CORE_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_CORE_URL || vars.DEVELOPMENT_CORE_URL }}
-        --build-arg OAUTH_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_OAUTH_URL || vars.DEVELOPMENT_OAUTH_URL }}
-        --build-arg BLOG_URL=${{ github.ref_name == 'main' && vars.PRODUCTION_BLOG_URL || vars.DEVELOPMENT_BLOG_URL }}
   update-manifest:
     name: Update Helm Manifest
     needs: build
