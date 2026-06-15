@@ -22,13 +22,9 @@ jobs:
       contents: read
       id-token: write
       packages: read
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_ACCESS_KEY_ID || secrets.DEVELOPMENT_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ github.ref_name == 'main' && secrets.PRODUCTION_AWS_SECRET_ACCESS_KEY || secrets.DEVELOPMENT_AWS_SECRET_ACCESS_KEY }}
     with:
       dockerfile: Dockerfile
-      registry_path: 050617084006.dkr.ecr.us-west-1.amazonaws.com/${{ github.ref_name == 'main' && 'production' || 'development' }}
-      region: ${{ github.ref_name == 'main' && vars.PRODUCTION_REGION || vars.DEVELOPMENT_REGION }}
+      environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
       runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
   update-manifest:
     name: Update Helm Manifest
