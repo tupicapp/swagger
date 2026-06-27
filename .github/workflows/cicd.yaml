@@ -1,35 +1,51 @@
-name: Build App
+name: Build & Deploy App
 
 on:
   push:
     branches:
       - dev
       - main
+    paths-ignore:
+      - helm-charts/app/**
+  workflow_dispatch:
 
 permissions:
   contents: write
+  id-token: write
+  packages: read
+
+concurrency:
+  group: build-deploy-app-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    name: Build ${{ github.ref_name == 'main' && 'Production' || 'Development' }}
-    uses: tupicapp/platform-infra/.github/workflows/shared-eks-build.yaml@main
-
-    # Dynamically choose correct AWS keys
+    name: Build ${{ github.ref_name == 'main' && 'production' || 'development' }}
+    uses: tupicapp/platform-workflows/.github/workflows/shared-eks-build.yaml@main
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    with:
+      dockerfile: Dockerfile
+      environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+      region: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGION' || 'DEVELOPMENT_REGION' ] }}
+      registry_path: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGISTRY_PATH' || 'DEVELOPMENT_REGISTRY_PATH' ] }}
+      runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets[ github.ref_name == 'main' && 'PRODUCTION_AWS_ACCESS_KEY_ID' || 'DEVELOPMENT_AWS_ACCESS_KEY_ID' ] }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets[ github.ref_name == 'main' && 'PRODUCTION_AWS_SECRET_ACCESS_KEY' || 'DEVELOPMENT_AWS_SECRET_ACCESS_KEY' ] }}
-
-    with:
-      dockerfile: Dockerfile
-      registry_path: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGISTRY_PATH' || 'DEVELOPMENT_REGISTRY_PATH' ] }}
-      region: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGION' || 'DEVELOPMENT_REGION' ] }}
-      runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
+      SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
+      TEMPCI: ${{ secrets.TEMPCI }}
 
   update-manifest:
     name: Update Helm Manifest
     needs: build
     runs-on: ubuntu-latest
-
+    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,18 +53,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Select correct Helm file
-        id: helmfile
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "file=helm-charts/app/values.yaml" >> $GITHUB_OUTPUT
-          else
-            echo "file=helm-charts/app/values.development.yaml" >> $GITHUB_OUTPUT
-          fi
-
       - name: Update image tag
         run: |
-          FILE="${{ steps.helmfile.outputs.file }}"
+          FILE="helm-charts/app/values.yaml"
           TAG="${{ needs.build.outputs.image_tag }}"
 
           echo "Updating $FILE with new tag: $TAG"
@@ -56,7 +63,6 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          # Original commit author+message
           COMMIT_MSG=$(git log -1 --pretty=%B)
           AUTHOR_NAME=$(git log -1 --pretty="%an")
           AUTHOR_EMAIL=$(git log -1 --pretty="%ae")
@@ -67,7 +73,7 @@ jobs:
           git add helm-charts/app/
 
           if git diff --cached --quiet; then
-            echo "No changes in Helm values — skipping commit."
+            echo "No changes in Helm values - skipping commit."
           else
             echo "Committing Helm update..."
             git commit -m "$COMMIT_MSG"
