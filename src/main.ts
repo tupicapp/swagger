@@ -9,10 +9,10 @@ import {buildBrandCssVars, ServiceBrand} from '@tupicapp/web-ui/server-init';
 import {SwaggerUIBundle, SwaggerUIStandalonePreset} from "swagger-ui-dist"
 
 const iamUrl = import.meta.env.VITE_IAM_URL || "/configs/iam.json";
-const accountsCoreUrl = import.meta.env.VITE_ACCOUNTS_URL || "https://api.tupic.com/accounts/swagger/api.json";
-const liveCoreUrl = import.meta.env.VITE_LIVE_CORE_URL ||  "https://api.tupic.com/live/swagger/api.json";
-const tagCoreUrl = import.meta.env.VITE_TAG_CORE_URL ||  "https://api.tupic.com/tag/swagger/api.json";
-const assetsCoreUrl = import.meta.env.VITE_ASSETS_CORE_URL ||  "https://api.tupic.com/assets/swagger/api.json";
+const accountsCoreUrl = import.meta.env.VITE_ACCOUNTS_URL || "https://api.tupic.com/accounts/docs/public/user/doc.json";
+const liveCoreUrl = import.meta.env.VITE_LIVE_CORE_URL ||  "https://api.live.tupic.com/swagger/api.json";
+const tagCoreUrl = import.meta.env.VITE_TAG_CORE_URL ||  "https://api.tupic.com/tag/docs/public/user/doc.json";
+const assetsCoreUrl = import.meta.env.VITE_ASSETS_CORE_URL ||  "https://api.tupic.com/assets/docs/public/user/doc.json";
 const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1-production.json";
 const financeUrl = import.meta.env.VITE_FINANCE_URL || "/configs/finance.yaml";
 const insightsUrl = import.meta.env.VITE_INSIGHTS_URL || "https://api.tupic.com/insights/v1/openapi.json";
