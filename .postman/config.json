@@ -1,0 +1,18 @@
+{
+  "workspace": {
+    "id": "69d88336-ba17-4c8a-8deb-69a1ee4080c4"
+  },
+  "entities": {
+    "environments": [],
+    "flows": [],
+    "globals": [],
+    "mocks": [],
+    "specs": [
+      "../public/configs/blog-v1-development.json",
+      "../public/configs/blog-v1-production.json",
+      "../public/configs/finance.yaml",
+      "../public/configs/iam.json"
+    ],
+    "collections": []
+  }
+}

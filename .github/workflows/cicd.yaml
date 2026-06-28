@@ -1,4 +1,5 @@
 name: Build & Deploy App
+
 on:
   push:
     branches:
@@ -7,13 +8,16 @@ on:
     paths-ignore:
       - helm-charts/app/**
   workflow_dispatch:
+
 permissions:
   contents: write
   id-token: write
   packages: read
+
 concurrency:
   group: build-deploy-app-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   build:
     name: Build ${{ github.ref_name == 'main' && 'production' || 'development' }}
@@ -25,7 +29,15 @@ jobs:
     with:
       dockerfile: Dockerfile
       environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
+      region: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGION' || 'DEVELOPMENT_REGION' ] }}
+      registry_path: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGISTRY_PATH' || 'DEVELOPMENT_REGISTRY_PATH' ] }}
       runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets[ github.ref_name == 'main' && 'PRODUCTION_AWS_ACCESS_KEY_ID' || 'DEVELOPMENT_AWS_ACCESS_KEY_ID' ] }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets[ github.ref_name == 'main' && 'PRODUCTION_AWS_SECRET_ACCESS_KEY' || 'DEVELOPMENT_AWS_SECRET_ACCESS_KEY' ] }}
+      SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
+      TEMPCI: ${{ secrets.TEMPCI }}
+
   update-manifest:
     name: Update Helm Manifest
     needs: build
@@ -40,20 +52,26 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+
       - name: Update image tag
         run: |
-          FILE="${{ github.ref_name == 'main' && 'helm-charts/app/values.yaml' || 'helm-charts/app/values.development.yaml' }}"
+          FILE="helm-charts/app/values.yaml"
           TAG="${{ needs.build.outputs.image_tag }}"
+
           echo "Updating $FILE with new tag: $TAG"
           sed -i "s|tag:.*|tag: \"$TAG\"|g" "$FILE"
+
       - name: Commit and push changes
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           AUTHOR_NAME=$(git log -1 --pretty="%an")
           AUTHOR_EMAIL=$(git log -1 --pretty="%ae")
+
           git config user.name "$AUTHOR_NAME"
           git config user.email "$AUTHOR_EMAIL"
+
           git add helm-charts/app/
+
           if git diff --cached --quiet; then
             echo "No changes in Helm values - skipping commit."
           else

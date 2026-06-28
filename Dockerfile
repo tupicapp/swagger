@@ -15,16 +15,19 @@ ENV VITE_BLOG_URL=$BLOG_URL
 WORKDIR /app
 
 # Copy package.json and yarn.lock files to the working directory
-COPY package.json yarn.lock ./
-
-# Install dependencies
-RUN yarn install
+COPY package.json package-lock.json .npmrc ./
+RUN --mount=type=secret,id=github_token \
+    GITHUB_TOKEN="$(cat /run/secrets/github_token)" \
+    && test -n "$GITHUB_TOKEN" || (echo "Missing github_token build secret for private package install" && exit 1) \
+    && printf "@tupicapp:registry=https://npm.pkg.github.com\n//npm.pkg.github.com/:_authToken=%s\n" "$GITHUB_TOKEN" > /root/.npmrc \
+    && npm ci \
+    && rm -f /root/.npmrc
 
 # Copy the rest of the application code to the working directory
 COPY . .
 
 # Build the project
-RUN yarn build
+RUN npm run build
 
 # Stage 2: Serve the application with NGINX
 FROM nginx:alpine
