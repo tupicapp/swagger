@@ -16,6 +16,7 @@ const assetsCoreUrl = import.meta.env.VITE_ASSETS_CORE_URL ||  "https://api.tupi
 const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1-production.json";
 const financeUrl = import.meta.env.VITE_FINANCE_URL || "/configs/finance.yaml";
 const insightsUrl = import.meta.env.VITE_INSIGHTS_URL || "https://api.tupic.com/insights/v1/openapi.json";
+const notificationsUrl = import.meta.env.VITE_NOTIFICATIONS_URL || "https://api.tupic.com/notifications/docs/public/user/doc.json";
 
 const root = document.documentElement;
 root.dataset.theme = 'dark';
@@ -40,6 +41,7 @@ SwaggerUIBundle({
         {url: blogUrl, name: "Blog (v1)"},
         {url: financeUrl, name: "Finance (v1)"},
         {url: insightsUrl, name: "Insights (v1)"},
+        {url: notificationsUrl, name: "Tupic Notifications"},
     ],
     "urls.primaryName": "Tupic Live (v2)",
     presets: [
