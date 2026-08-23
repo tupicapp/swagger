@@ -26,17 +26,11 @@ jobs:
       contents: read
       id-token: write
       packages: read
+    secrets: inherit
     with:
       dockerfile: Dockerfile
       environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
-      region: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGION' || 'DEVELOPMENT_REGION' ] }}
-      registry_path: ${{ vars[ github.ref_name == 'main' && 'PRODUCTION_REGISTRY_PATH' || 'DEVELOPMENT_REGISTRY_PATH' ] }}
       runner_type: ${{ vars.RUNNER_TYPE || 'ubuntu-latest' }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets[ github.ref_name == 'main' && 'PRODUCTION_AWS_ACCESS_KEY_ID' || 'DEVELOPMENT_AWS_ACCESS_KEY_ID' ] }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets[ github.ref_name == 'main' && 'PRODUCTION_AWS_SECRET_ACCESS_KEY' || 'DEVELOPMENT_AWS_SECRET_ACCESS_KEY' ] }}
-      SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
-      TEMPCI: ${{ secrets.TEMPCI }}
 
   update-manifest:
     name: Update Helm Manifest
