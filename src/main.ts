@@ -39,7 +39,7 @@ SwaggerUIBundle({
         {url: assetsCoreUrl, name: "Tupic Assets (v1)"},
         {url: financeUrl, name: "Tupic Finance"},
         {url: insightsUrl, name: "Tupic Insights"},
-        {url: notificationsUrl, name: "Tupic Notifications"},
+        {url: notificationsUrl, name: "Tupic Notifications (v1)"},
     ],
     "urls.primaryName": "Tupic Live (v2)",
     presets: [
