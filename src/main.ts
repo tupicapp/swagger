@@ -13,7 +13,6 @@ const accountsCoreUrl = import.meta.env.VITE_ACCOUNTS_URL || "https://api.tupic.
 const liveCoreUrl = import.meta.env.VITE_LIVE_CORE_URL ||  "https://api.live.tupic.com/swagger/api.json";
 const tagCoreUrl = import.meta.env.VITE_TAG_CORE_URL ||  "https://api.tupic.com/tag/docs/public/user/doc.json";
 const assetsCoreUrl = import.meta.env.VITE_ASSETS_CORE_URL ||  "https://api.tupic.com/assets/docs/public/user/doc.json";
-const blogUrl = import.meta.env.VITE_BLOG_URL || "/configs/blog-v1-production.json";
 const financeUrl = import.meta.env.VITE_FINANCE_URL || "/configs/finance.yaml";
 const insightsUrl = import.meta.env.VITE_INSIGHTS_URL || "https://api.tupic.com/insights/v1/openapi.json";
 const notificationsUrl = import.meta.env.VITE_NOTIFICATIONS_URL || "https://api.tupic.com/notifications/docs/public/user/doc.json";
@@ -33,14 +32,13 @@ for (const declaration of buildBrandCssVars(ServiceBrand.chain()).split(';')) {
 SwaggerUIBundle({
     dom_id: '#swagger-ui',
     urls: [
-        {url: iamUrl, name: "Iam"},
+        {url: iamUrl, name: "Tupic IAM"},
         {url: accountsCoreUrl, name: "Tupic Accounts (v2)"},
         {url: liveCoreUrl, name: "Tupic Live (v2)"},
         {url: tagCoreUrl, name: "Tupic Tag (v1)"},
         {url: assetsCoreUrl, name: "Tupic Assets (v1)"},
-        {url: blogUrl, name: "Blog (v1)"},
-        {url: financeUrl, name: "Finance (v1)"},
-        {url: insightsUrl, name: "Insights (v1)"},
+        {url: financeUrl, name: "Tupic Finance"},
+        {url: insightsUrl, name: "Tupic Insights"},
         {url: notificationsUrl, name: "Tupic Notifications"},
     ],
     "urls.primaryName": "Tupic Live (v2)",
