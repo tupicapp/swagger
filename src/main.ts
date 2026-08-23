@@ -32,13 +32,13 @@ for (const declaration of buildBrandCssVars(ServiceBrand.chain()).split(';')) {
 SwaggerUIBundle({
     dom_id: '#swagger-ui',
     urls: [
-        {url: iamUrl, name: "Tupic IAM"},
+        {url: iamUrl, name: "Tupic IAM (v1)"},
         {url: accountsCoreUrl, name: "Tupic Accounts (v2)"},
         {url: liveCoreUrl, name: "Tupic Live (v2)"},
         {url: tagCoreUrl, name: "Tupic Tag (v1)"},
         {url: assetsCoreUrl, name: "Tupic Assets (v1)"},
-        {url: financeUrl, name: "Tupic Finance"},
-        {url: insightsUrl, name: "Tupic Insights"},
+        {url: financeUrl, name: "Tupic Finance (v1)"},
+        {url: insightsUrl, name: "Tupic Insights (v1)"},
         {url: notificationsUrl, name: "Tupic Notifications (v1)"},
     ],
     "urls.primaryName": "Tupic Live (v2)",
