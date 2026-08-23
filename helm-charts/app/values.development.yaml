@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   app:
     repository: "050617084006.dkr.ecr.us-west-1.amazonaws.com/development/swagger"
-    tag: "d7606a2"
+    tag: "32e7db3"
     pullPolicy: "Always"
 
 imagePullSecret:
@@ -33,7 +33,3 @@ resources:
 
 env:
   variables:
-    VITE_CORE_URL: "https://api.tupic.com/swagger/api.json"
-    VITE_OAUTH_URL: "https://api.tupic.com/swagger/oauth.json"
-    VITE_BLOG_URL: "/configs/blog-v1-development.json"
-

@@ -49,7 +49,7 @@ jobs:
 
       - name: Update image tag
         run: |
-          FILE="helm-charts/app/values.yaml"
+          FILE="${{ github.ref_name == 'main' && 'helm-charts/app/values.yaml' || 'helm-charts/app/values.development.yaml' }}"
           TAG="${{ needs.build.outputs.image_tag }}"
 
           echo "Updating $FILE with new tag: $TAG"
