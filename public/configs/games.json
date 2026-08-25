@@ -1,0 +1,662 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TupicGame API",
+    "description": "AI-Powered Game Creation Platform API. Generates HTML5 games using Claude AI with custom AI-generated assets from Google Imagen and TupicLive.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Mixel Startup Studio",
+      "url": "https://games.tupic.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.tupic.com/games/api/v1",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "name": { "type": "string" },
+          "org_id": { "type": "string", "format": "uuid" },
+          "role": { "type": "string", "enum": ["owner", "admin", "member"] }
+        }
+      },
+      "Game": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "template_key": { "type": "string" },
+          "org_id": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["draft", "generated"] },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Template": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "key": { "type": "string" },
+          "name": { "type": "string" },
+          "genre": { "type": "string", "enum": ["runner", "shooter", "platformer", "puzzle", "quiz"] },
+          "level_model": { "type": "object" },
+          "sdk_hooks": { "type": "object" }
+        }
+      },
+      "GameSpec": {
+        "type": "object",
+        "properties": {
+          "genre": { "type": "string" },
+          "sub_template": { "type": "string" },
+          "theme": { "type": "string" },
+          "art_style": { "type": "string" },
+          "difficulty": { "type": "string", "enum": ["gentle", "medium", "steep"] },
+          "mechanics": { "type": "array", "items": { "type": "string" } },
+          "score_type": { "type": "string" },
+          "level_count": { "type": "integer" },
+          "lives": { "type": "integer" }
+        }
+      },
+      "AssetPrompt": {
+        "type": "object",
+        "properties": {
+          "prompt": { "type": "string" },
+          "size": { "type": "string", "example": "1024x1024" },
+          "slot_key": { "type": "string" },
+          "required": { "type": "boolean" }
+        }
+      },
+      "AssetJob": {
+        "type": "object",
+        "properties": {
+          "job_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["running", "done", "error"] },
+          "total": { "type": "integer" },
+          "done": { "type": "integer" },
+          "asset_map": { "type": "object", "additionalProperties": { "type": "string", "nullable": true } }
+        }
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "sub_templates": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Health check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": { "type": "string", "example": "TupicGame API" },
+                    "status": { "type": "string", "example": "ok" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register new user and organization",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "name"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 6 },
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registration successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login and get JWT token",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "access_token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current user info",
+        "responses": {
+          "200": {
+            "description": "User info",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games": {
+      "get": {
+        "tags": ["Games"],
+        "summary": "List all games for organization",
+        "responses": {
+          "200": {
+            "description": "Games list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "games": { "type": "array", "items": { "$ref": "#/components/schemas/Game" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Games"],
+        "summary": "Create new game",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "template_key"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "template_key": { "type": "string", "example": "html5_shooter_v1" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Game created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "game": { "$ref": "#/components/schemas/Game" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{game_id}": {
+      "parameters": [{ "name": "game_id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+      "get": {
+        "tags": ["Games"],
+        "summary": "Get game details",
+        "responses": { "200": { "description": "Game details" } }
+      },
+      "put": {
+        "tags": ["Games"],
+        "summary": "Update game",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "status": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "Game updated" } }
+      },
+      "delete": {
+        "tags": ["Games"],
+        "summary": "Delete game",
+        "responses": { "200": { "description": "Game deleted" } }
+      }
+    },
+    "/games/{game_id}/generate": {
+      "post": {
+        "tags": ["Games"],
+        "summary": "Generate HTML5 game with Claude AI",
+        "parameters": [{ "name": "game_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "prompt": { "type": "string", "description": "Custom instructions" },
+                  "theme": { "type": "string" },
+                  "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+                  "level_count": { "type": "integer", "default": 5 },
+                  "asset_map": { "type": "object", "description": "Map of slot_key to image URL", "additionalProperties": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Game generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "game_url": { "type": "string", "format": "uri" },
+                    "filename": { "type": "string" },
+                    "game": { "$ref": "#/components/schemas/Game" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{game_id}/preview": {
+      "get": {
+        "tags": ["Games"],
+        "summary": "List game builds",
+        "parameters": [{ "name": "game_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Build list" } }
+      }
+    },
+    "/games/{game_id}/export/webgl": {
+      "post": { "tags": ["Export"], "summary": "Export as Unity WebGL", "parameters": [{ "name": "game_id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "WebGL export" } } }
+    },
+    "/games/{game_id}/export/native": {
+      "post": { "tags": ["Export"], "summary": "Export as Unity Native C#", "parameters": [{ "name": "game_id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Native export" } } }
+    },
+    "/games/{game_id}/export/html": {
+      "get": { "tags": ["Export"], "summary": "Download HTML file", "parameters": [{ "name": "game_id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "HTML file" } } }
+    },
+    "/templates": {
+      "get": {
+        "tags": ["Templates"],
+        "summary": "List available templates",
+        "responses": { "200": { "description": "Templates list" } }
+      }
+    },
+    "/engine/genres": {
+      "get": {
+        "tags": ["Engine"],
+        "summary": "List all game genres and sub-templates",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Genre list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "genres": { "type": "object", "additionalProperties": { "$ref": "#/components/schemas/Genre" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/engine/genres/{genre}/questions": {
+      "get": {
+        "tags": ["Engine"],
+        "summary": "Get customization questions for genre",
+        "parameters": [{ "name": "genre", "in": "path", "required": true, "schema": { "type": "string", "enum": ["runner", "shooter", "platformer", "puzzle", "quiz"] } }],
+        "responses": { "200": { "description": "Questions list" } }
+      }
+    },
+    "/engine/genres/{genre}/assets": {
+      "get": {
+        "tags": ["Engine"],
+        "summary": "Get asset slots for genre",
+        "parameters": [{ "name": "genre", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Asset slots" } }
+      }
+    },
+    "/engine/spec": {
+      "post": {
+        "tags": ["Engine"],
+        "summary": "Generate game specification from genre + answers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["genre", "answers"],
+                "properties": {
+                  "genre": { "type": "string" },
+                  "answers": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Game spec generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "game_spec": { "$ref": "#/components/schemas/GameSpec" },
+                    "asset_slots": { "type": "object" },
+                    "sub_template_config": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/engine/prompts": {
+      "post": {
+        "tags": ["Engine"],
+        "summary": "Generate asset prompts from game spec",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "game_spec": { "$ref": "#/components/schemas/GameSpec" },
+                  "asset_slots": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prompts generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "prompts": { "type": "array", "items": { "$ref": "#/components/schemas/AssetPrompt" } },
+                    "count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/engine/assets/generate": {
+      "post": {
+        "tags": ["Engine - Assets"],
+        "summary": "Start async asset generation (TupicLive backend)",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "prompts": { "type": "array", "items": { "$ref": "#/components/schemas/AssetPrompt" } }, "genre": { "type": "string" }, "answers": { "type": "object" } } } } } },
+        "responses": { "202": { "description": "Generation started", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AssetJob" } } } } }
+      }
+    },
+    "/engine/assets/status/{job_id}": {
+      "get": {
+        "tags": ["Engine - Assets"],
+        "summary": "Check asset generation status",
+        "parameters": [{ "name": "job_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Job status", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AssetJob" } } } } }
+      }
+    },
+    "/engine/create-game": {
+      "post": {
+        "tags": ["Engine"],
+        "summary": "Full flow: genre → spec → prompts → generate assets (TupicLive)",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "required": ["game_name", "genre"], "properties": { "game_name": { "type": "string" }, "genre": { "type": "string" }, "answers": { "type": "object" } } } } } },
+        "responses": { "202": { "description": "Game creation started" } }
+      }
+    },
+    "/engine/google/generate": {
+      "post": {
+        "tags": ["Engine - Google"],
+        "summary": "Generate single image via Google Imagen/Gemini",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["prompt"],
+                "properties": {
+                  "prompt": { "type": "string" },
+                  "backend": { "type": "string", "enum": ["imagen", "gemini"], "default": "imagen" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Image generated", "content": { "application/json": { "schema": { "type": "object", "properties": { "url": { "type": "string", "format": "uri" }, "backend": { "type": "string" } } } } } } }
+      }
+    },
+    "/engine/google/generate-assets": {
+      "post": {
+        "tags": ["Engine - Google"],
+        "summary": "Generate all game assets via Google (async)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "genre": { "type": "string" },
+                  "answers": { "type": "object" },
+                  "prompts": { "type": "array", "items": { "$ref": "#/components/schemas/AssetPrompt" } },
+                  "backend": { "type": "string", "enum": ["imagen", "gemini"], "default": "imagen" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "202": { "description": "Generation started", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AssetJob" } } } } }
+      }
+    },
+    "/tupiclive/health": {
+      "get": {
+        "tags": ["TupicLive"],
+        "summary": "TupicLive integration health check",
+        "security": [],
+        "responses": { "200": { "description": "TupicLive status" } }
+      }
+    },
+    "/tupiclive/channels": {
+      "get": { "tags": ["TupicLive - Streaming"], "summary": "List TupicLive channels", "responses": { "200": { "description": "Channels list" } } }
+    },
+    "/tupiclive/streams/setup": {
+      "post": {
+        "tags": ["TupicLive - Streaming"],
+        "summary": "Setup channel + RTMP program for streaming",
+        "responses": {
+          "200": {
+            "description": "Stream setup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "channel_id": { "type": "string" },
+                    "stream_key": { "type": "string" },
+                    "rtmp_url": { "type": "string" },
+                    "playback_url": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tupiclive/upload": {
+      "post": {
+        "tags": ["TupicLive - Assets"],
+        "summary": "Upload file to TupicLive",
+        "requestBody": { "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "file": { "type": "string", "format": "binary" }, "name": { "type": "string" }, "description": { "type": "string" } } } } } },
+        "responses": { "201": { "description": "File uploaded and asset created" } }
+      }
+    },
+    "/tupiclive/assets": {
+      "get": {
+        "tags": ["TupicLive - Assets"],
+        "summary": "List TupicLive assets",
+        "parameters": [
+          { "name": "media_type", "in": "query", "schema": { "type": "string", "enum": ["image", "video", "audio", "text"] } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "per_page", "in": "query", "schema": { "type": "integer", "default": 15 } }
+        ],
+        "responses": { "200": { "description": "Assets list" } }
+      }
+    },
+    "/tupiclive/assets/{asset_id}": {
+      "delete": { "tags": ["TupicLive - Assets"], "summary": "Delete asset", "parameters": [{ "name": "asset_id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Deleted" } } }
+    },
+    "/tupiclive/tasks/text-image": {
+      "post": {
+        "tags": ["TupicLive - Content AI"],
+        "summary": "Generate image from text prompt",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "required": ["prompt"], "properties": { "prompt": { "type": "string" }, "size": { "type": "string", "default": "1024x1024", "enum": ["1024x1024", "1024x1792", "1792x1024"] }, "mode": { "type": "string", "default": "single", "enum": ["single", "multiple"] } } } } } },
+        "responses": { "200": { "description": "Task created" } }
+      }
+    },
+    "/tupiclive/tasks/{task_id}": {
+      "get": { "tags": ["TupicLive - Content AI"], "summary": "Get task status", "parameters": [{ "name": "task_id", "in": "path", "required": true, "schema": { "type": "string" } }], "responses": { "200": { "description": "Task status" } } }
+    },
+    "/tupiclive/tasks/game-assets": {
+      "post": { "tags": ["TupicLive - Content AI"], "summary": "Generate game asset pack", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "game_name": { "type": "string" }, "theme": { "type": "string" }, "genre": { "type": "string" } } } } } }, "responses": { "200": { "description": "Tasks created" } } }
+    },
+    "/tupiclive/relay/start": {
+      "post": {
+        "tags": ["TupicLive - Streaming"],
+        "summary": "Start FFmpeg RTMP relay",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "required": ["channel_id", "rtmp_url", "stream_key"], "properties": { "channel_id": { "type": "string" }, "rtmp_url": { "type": "string" }, "stream_key": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "Relay started" } }
+      }
+    },
+    "/tupiclive/relay/chunk/{channel_id}": {
+      "post": {
+        "tags": ["TupicLive - Streaming"],
+        "summary": "Send video chunk to relay",
+        "parameters": [{ "name": "channel_id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/octet-stream": { "schema": { "type": "string", "format": "binary" } } } },
+        "responses": { "200": { "description": "Chunk received" } }
+      }
+    },
+    "/tupiclive/relay/stop": {
+      "post": { "tags": ["TupicLive - Streaming"], "summary": "Stop relay", "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "channel_id": { "type": "string" } } } } } }, "responses": { "200": { "description": "Relay stopped" } } }
+    },
+    "/tupiclive/relay/status": {
+      "get": { "tags": ["TupicLive - Streaming"], "summary": "Get active relay streams", "responses": { "200": { "description": "Active streams" } } }
+    }
+  },
+  "tags": [
+    { "name": "System", "description": "Health checks" },
+    { "name": "Auth", "description": "Authentication & authorization" },
+    { "name": "Games", "description": "Game CRUD & generation" },
+    { "name": "Export", "description": "Unity WebGL/Native export" },
+    { "name": "Templates", "description": "Game templates" },
+    { "name": "Engine", "description": "Template Engine, Prompt Engine, Game Spec" },
+    { "name": "Engine - Assets", "description": "Asset generation pipeline (TupicLive)" },
+    { "name": "Engine - Google", "description": "Google Imagen/Gemini image generation" },
+    { "name": "TupicLive", "description": "TupicLive API integration" },
+    { "name": "TupicLive - Streaming", "description": "Live streaming via RTMP" },
+    { "name": "TupicLive - Assets", "description": "TupicLive asset management" },
+    { "name": "TupicLive - Content AI", "description": "TupicLive AI content generation" }
+  ]
+}

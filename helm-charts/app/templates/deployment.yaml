@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   annotations:
-    checksum/config: {{ .Files.Get "configmap.yaml" | sha256sum }}
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
   labels: {{ include "app.labels" . | nindent 4 }}
 spec:
   selector:
@@ -32,7 +32,7 @@ spec:
             - containerPort: 80
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: 80
               scheme: HTTP
             initialDelaySeconds: 30
@@ -42,7 +42,7 @@ spec:
             failureThreshold: 10
           readinessProbe:
             httpGet:
-              path: /
+              path: /healthz
               port: 80
               scheme: HTTP
             timeoutSeconds: 1
