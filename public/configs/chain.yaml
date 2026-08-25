@@ -1,0 +1,1548 @@
+openapi: 3.0.3
+info:
+  title: TupicChain API
+  version: 5.0.0
+  description: OpenAPI specification for the Express API implemented in `auth-system.js`.
+servers:
+  - url: https://chain.tupic.com
+    description: Production
+tags:
+  - name: RPC
+  - name: Auth
+  - name: Data
+  - name: Payments
+  - name: Partners
+  - name: Network
+  - name: User
+  - name: Wallet
+  - name: Transactions
+  - name: Admin
+  - name: Metrics
+  - name: Rewards
+  - name: Contracts
+components:
+  securitySchemes:
+    DataApiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Partner API key for `type = data`.
+    PaymentApiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Partner API key for `type = payment`.
+    MetricsKey:
+      type: apiKey
+      in: header
+      name: x-metrics-key
+      description: Metrics key or admin key.
+    AdminBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Keycloak admin JWT in the `Authorization` header.
+    SessionToken:
+      type: apiKey
+      in: header
+      name: x-auth-token
+      description: User SSO session token.
+  parameters:
+    FingerprintParam:
+      name: fingerprint
+      in: path
+      required: true
+      schema:
+        type: string
+    AddressParam:
+      name: address
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^0x[a-fA-F0-9]{40}$'
+    PaymentIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    PartnerIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        oneOf:
+          - type: integer
+          - type: string
+    SessionIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        oneOf:
+          - type: integer
+          - type: string
+    TxHashParam:
+      name: hash
+      in: path
+      required: true
+      schema:
+        type: string
+    BlockNumberParam:
+      name: number
+      in: path
+      required: true
+      schema:
+        oneOf:
+          - type: integer
+          - type: string
+            enum: [latest]
+    KeycloakIdParam:
+      name: keycloakId
+      in: path
+      required: true
+      schema:
+        type: string
+    DateFromQuery:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    DateToQuery:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date
+    LimitQuery:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+    OffsetQuery:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+    RpcRequest:
+      type: object
+      description: Standard Ethereum JSON-RPC request payload.
+      additionalProperties: true
+    FingerprintRegistration:
+      type: object
+      properties:
+        fingerprint:
+          type: string
+        contributor:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{40}$'
+      required: [fingerprint, contributor]
+    PaymentCreateRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        description:
+          type: string
+        orderId:
+          type: string
+        callbackUrl:
+          type: string
+          format: uri
+        cancelUrl:
+          type: string
+          format: uri
+      required: [amount]
+    PaymentConfirmRequest:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        txHash:
+          type: string
+        payer:
+          type: string
+      required: [paymentId, txHash, payer]
+    WalletTransferRequest:
+      type: object
+      properties:
+        to:
+          type: string
+        amount:
+          oneOf:
+            - type: number
+            - type: string
+        note:
+          type: string
+      required: [to, amount]
+    PartnerCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        recipient:
+          type: string
+      required: [name, type]
+    PartnerUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        recipient:
+          type: string
+    MintRequest:
+      type: object
+      properties:
+        to:
+          type: string
+        amount:
+          oneOf:
+            - type: number
+            - type: string
+        reason:
+          type: string
+      required: [to, amount, reason]
+    TokenTransferRequest:
+      type: object
+      properties:
+        to:
+          type: string
+        amount:
+          oneOf:
+            - type: number
+            - type: string
+      required: [to, amount]
+    TxSendRequest:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        value:
+          oneOf:
+            - type: number
+            - type: string
+        data:
+          type: string
+      required: [to]
+    RewardDistributeRequest:
+      type: object
+      properties:
+        userAddress:
+          type: string
+        rewardType:
+          type: string
+        ref:
+          type: string
+      required: [userAddress, rewardType]
+    RewardDistributeByUserRequest:
+      type: object
+      properties:
+        keycloakId:
+          type: string
+        rewardType:
+          type: string
+        amount:
+          oneOf:
+            - type: number
+            - type: string
+        ref:
+          type: string
+      required: [keycloakId, rewardType]
+    RewardDistributeCustomRequest:
+      type: object
+      properties:
+        userAddress:
+          type: string
+        rewardType:
+          type: string
+        amount:
+          oneOf:
+            - type: number
+            - type: string
+        ref:
+          type: string
+      required: [userAddress, rewardType, amount]
+    WalletCreateRequest:
+      type: object
+      properties:
+        label:
+          type: string
+      required: [label]
+    WalletFundRequest:
+      type: object
+      properties:
+        to:
+          type: string
+        amount:
+          oneOf:
+            - type: number
+            - type: string
+      required: [to, amount]
+    RotateKeyRequest:
+      type: object
+      properties:
+        partnerId:
+          oneOf:
+            - type: integer
+            - type: string
+      required: [partnerId]
+    VerifyTokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+      required: [token]
+    SsoTokenRequest:
+      type: object
+      properties:
+        access_token:
+          type: string
+      required: [access_token]
+    PaymentIdRequest:
+      type: object
+      properties:
+        paymentId:
+          type: string
+      required: [paymentId]
+    ConfirmationDeleteRequest:
+      type: object
+      properties:
+        confirmation:
+          type: string
+          enum: [DELETE]
+      required: [confirmation]
+    MetaMaskConnectRequest:
+      type: object
+      properties:
+        metamaskAddress:
+          type: string
+      required: [metamaskAddress]
+    GenericObject:
+      type: object
+      additionalProperties: true
+paths:
+  /api/rpc:
+    post:
+      tags: [RPC]
+      summary: Proxy Ethereum JSON-RPC to the local Geth node.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RpcRequest'
+      responses:
+        '200':
+          description: JSON-RPC response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '500':
+          description: Proxy error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/verify:
+    post:
+      tags: [Auth]
+      summary: Verify a stored session token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyTokenRequest'
+      responses:
+        '200':
+          description: Session is valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Token missing, invalid, or expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Delete a session token from Redis and PostgreSQL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyTokenRequest'
+      responses:
+        '200':
+          description: Logout result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/auth/sso-init:
+    get:
+      tags: [Auth]
+      summary: Start SSO PKCE flow and redirect to Keycloak.
+      parameters:
+        - name: redirect
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to IAM authorization endpoint.
+  /api/auth/sso-callback:
+    get:
+      tags: [Auth]
+      summary: Handle Keycloak callback and establish user session.
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: error
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to dashboard, onboarding, or login error page.
+  /api/auth/sso-login:
+    post:
+      tags: [Auth]
+      summary: Create a chain-core session from a Keycloak access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SsoTokenRequest'
+      responses:
+        '200':
+          description: Session created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/auth/mobile-login:
+    post:
+      tags: [Auth]
+      summary: Mobile-oriented SSO login endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SsoTokenRequest'
+      responses:
+        '200':
+          description: Session created plus wallet state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Invalid token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/data/register:
+    post:
+      tags: [Data]
+      summary: Register an asset fingerprint in the legacy registry.
+      security:
+        - DataApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FingerprintRegistration'
+      responses:
+        '200':
+          description: Asset registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '409':
+          description: Duplicate fingerprint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/data/check/{fingerprint}:
+    get:
+      tags: [Data]
+      summary: Check whether a legacy registry fingerprint exists.
+      parameters:
+        - $ref: '#/components/parameters/FingerprintParam'
+      responses:
+        '200':
+          description: Asset existence result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/data/contributor/{address}:
+    get:
+      tags: [Data]
+      summary: Read summary stats for a contributor wallet.
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: Contributor stats.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '400':
+          description: Invalid address.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v2/data/register:
+    post:
+      tags: [Data]
+      summary: Register an asset fingerprint in the advanced registry.
+      security:
+        - DataApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FingerprintRegistration'
+      responses:
+        '200':
+          description: Asset registered in v2 registry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '503':
+          description: Advanced registry not deployed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/v2/data/check/{fingerprint}:
+    get:
+      tags: [Data]
+      summary: Check whether a v2 registry fingerprint exists.
+      parameters:
+        - $ref: '#/components/parameters/FingerprintParam'
+      responses:
+        '200':
+          description: Asset existence result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/v2/data/stats:
+    get:
+      tags: [Data]
+      summary: Read aggregate stats from the advanced registry.
+      responses:
+        '200':
+          description: Registry stats.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '503':
+          description: Advanced registry not deployed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/payment/create:
+    post:
+      tags: [Payments]
+      summary: Create a payment session for a merchant.
+      security:
+        - PaymentApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreateRequest'
+      responses:
+        '200':
+          description: Payment session created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/payment/{id}:
+    get:
+      tags: [Payments]
+      summary: Get a payment session by ID.
+      parameters:
+        - $ref: '#/components/parameters/PaymentIdParam'
+      responses:
+        '200':
+          description: Payment details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: Payment not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/payment/pay-sso:
+    post:
+      tags: [Payments]
+      summary: Pay a pending merchant invoice using the logged-in user's stored wallet.
+      security:
+        - SessionToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentIdRequest'
+      responses:
+        '200':
+          description: Payment completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Session missing or expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/payment/confirm:
+    post:
+      tags: [Payments]
+      summary: Confirm a merchant payment by verifying an on-chain TPDT transfer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentConfirmRequest'
+      responses:
+        '200':
+          description: Payment confirmed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/payment/verify:
+    post:
+      tags: [Payments]
+      summary: Verify payment completion status for a merchant.
+      security:
+        - PaymentApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentIdRequest'
+      responses:
+        '200':
+          description: Payment validity status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/payment/list:
+    get:
+      tags: [Payments]
+      summary: List recent payments for the authenticated merchant.
+      security:
+        - PaymentApiKey: []
+      responses:
+        '200':
+          description: Payment list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/partners/{id}:
+    get:
+      tags: [Partners]
+      summary: Get public partner metadata by partner name.
+      parameters:
+        - $ref: '#/components/parameters/PartnerIdParam'
+      responses:
+        '200':
+          description: Partner metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: Partner not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/partners/rotate-key:
+    post:
+      tags: [Partners]
+      summary: Rotate a partner API key.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RotateKeyRequest'
+      responses:
+        '200':
+          description: Key rotated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/stats:
+    get:
+      tags: [Network]
+      summary: Get high-level network, token, and registry stats.
+      responses:
+        '200':
+          description: Network stats.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/health:
+    get:
+      tags: [Network]
+      summary: Health check for chain, PostgreSQL, and Redis.
+      responses:
+        '200':
+          description: Healthy response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '500':
+          description: Health failure.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/contracts:
+    get:
+      tags: [Contracts]
+      summary: Get deployed contract addresses and metadata.
+      responses:
+        '200':
+          description: Contract deployment details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/user/status:
+    get:
+      tags: [User]
+      summary: Get wallet and terms status for the current SSO user.
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: User status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '401':
+          description: Unauthorized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/user/accept-terms:
+    post:
+      tags: [User]
+      summary: Accept the current terms version for the logged-in user.
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: Terms accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/user/create-wallet:
+    post:
+      tags: [User]
+      summary: Create a custodial wallet for the logged-in user.
+      security:
+        - SessionToken: []
+      responses:
+        '200':
+          description: Wallet created or returned if it already exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '403':
+          description: Terms not accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/user/delete-account:
+    post:
+      tags: [User]
+      summary: Soft-delete the current user's wallet/account mapping.
+      security:
+        - SessionToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmationDeleteRequest'
+      responses:
+        '200':
+          description: Deletion scheduled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '409':
+          description: Already scheduled for deletion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/user/connect-metamask:
+    post:
+      tags: [User]
+      summary: Link or replace the logged-in user's wallet with a MetaMask address.
+      security:
+        - SessionToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetaMaskConnectRequest'
+      responses:
+        '200':
+          description: Wallet linked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/user/{address}:
+    get:
+      tags: [User]
+      summary: Get public wallet summary for an address.
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: User wallet summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/user/{address}/assets:
+    get:
+      tags: [User]
+      summary: Get asset contribution totals grouped by source for an address.
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: Asset buckets by source.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/user/wallet-by-keycloak/{keycloakId}:
+    get:
+      tags: [User]
+      summary: Resolve a wallet address by Keycloak user ID.
+      security:
+        - DataApiKey: []
+      parameters:
+        - $ref: '#/components/parameters/KeycloakIdParam'
+      responses:
+        '200':
+          description: Wallet mapping.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: Wallet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/wallet/transfer:
+    post:
+      tags: [Wallet]
+      summary: Transfer TPDT from the logged-in user's wallet to another address.
+      security:
+        - SessionToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransferRequest'
+      responses:
+        '200':
+          description: Transfer completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/wallet/create:
+    post:
+      tags: [Wallet]
+      summary: Create a managed partner wallet by label.
+      security:
+        - PaymentApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletCreateRequest'
+      responses:
+        '200':
+          description: Wallet created or existing wallet returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/wallet/list:
+    get:
+      tags: [Wallet]
+      summary: List partner wallets.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Wallet list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/wallet/{address}:
+    get:
+      tags: [Wallet]
+      summary: Get wallet balances and contribution stats for an address.
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: Wallet details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/wallet/fund:
+    post:
+      tags: [Wallet]
+      summary: Fund a wallet with native ETH from the owner wallet.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletFundRequest'
+      responses:
+        '200':
+          description: Funding transaction sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/tx/send:
+    post:
+      tags: [Transactions]
+      summary: Send a raw transaction from the owner or specified address.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TxSendRequest'
+      responses:
+        '200':
+          description: Transaction sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/tx/status/{hash}:
+    get:
+      tags: [Transactions]
+      summary: Get transaction and receipt status.
+      parameters:
+        - $ref: '#/components/parameters/TxHashParam'
+      responses:
+        '200':
+          description: Transaction status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: Transaction not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/tx/history/{address}:
+    get:
+      tags: [Transactions]
+      summary: Get recent logged transactions involving an address.
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: Transaction history.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/block/{number}:
+    get:
+      tags: [Transactions]
+      summary: Get block details and up to 20 expanded transactions.
+      parameters:
+        - $ref: '#/components/parameters/BlockNumberParam'
+      responses:
+        '200':
+          description: Block details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: Block not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Get admin dashboard aggregates.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Dashboard data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/partners:
+    get:
+      tags: [Admin]
+      summary: List partners.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Partner list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+    post:
+      tags: [Admin]
+      summary: Create a new partner.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerCreateRequest'
+      responses:
+        '200':
+          description: Partner created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/partners/{id}:
+    put:
+      tags: [Admin]
+      summary: Update an existing partner.
+      security:
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/PartnerIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PartnerUpdateRequest'
+      responses:
+        '200':
+          description: Partner updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+        '404':
+          description: Partner not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: [Admin]
+      summary: Delete a partner.
+      security:
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/PartnerIdParam'
+      responses:
+        '200':
+          description: Partner deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+  /api/admin/partners/{id}/regenerate-key:
+    post:
+      tags: [Admin]
+      summary: Regenerate a partner API key.
+      security:
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/PartnerIdParam'
+      responses:
+        '200':
+          description: New API key issued.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/sessions:
+    get:
+      tags: [Admin]
+      summary: List recent sessions.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Session list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+    delete:
+      tags: [Admin]
+      summary: Delete all expired sessions.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Deleted session count.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/sessions/{id}:
+    delete:
+      tags: [Admin]
+      summary: Delete a specific session.
+      security:
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/SessionIdParam'
+      responses:
+        '200':
+          description: Session deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+  /api/admin/payments:
+    get:
+      tags: [Admin]
+      summary: List payments with optional filtering and pagination.
+      security:
+        - AdminBearer: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: merchant
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/OffsetQuery'
+      responses:
+        '200':
+          description: Payment list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/activity:
+    get:
+      tags: [Admin]
+      summary: List activity log entries.
+      security:
+        - AdminBearer: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/OffsetQuery'
+      responses:
+        '200':
+          description: Activity list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/token/mint:
+    post:
+      tags: [Admin]
+      summary: Mint TPDT to a contributor address.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MintRequest'
+      responses:
+        '200':
+          description: Mint transaction sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/token/transfer:
+    post:
+      tags: [Admin]
+      summary: Transfer TPDT from the owner wallet.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenTransferRequest'
+      responses:
+        '200':
+          description: Transfer transaction sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/token/balance/{address}:
+    get:
+      tags: [Admin]
+      summary: Get ETH and TPDT balances for an address.
+      security:
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: Address balances.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/nodes:
+    get:
+      tags: [Admin]
+      summary: Get node topology and local node health.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Node status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/wallets-all:
+    get:
+      tags: [Admin]
+      summary: List user and partner wallets with balances.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Wallet inventory.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: List users, linked wallets, and terms acceptance metadata.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: User list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/admin/connected-wallets:
+    get:
+      tags: [Admin]
+      summary: List distinct wallet addresses seen in session activity.
+      security:
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Connected wallet list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/metrics/summary:
+    get:
+      tags: [Metrics]
+      summary: Get combined usage, payment, partner, and network metrics.
+      security:
+        - MetricsKey: []
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/DateFromQuery'
+        - $ref: '#/components/parameters/DateToQuery'
+      responses:
+        '200':
+          description: Metrics summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/metrics/gas:
+    get:
+      tags: [Metrics]
+      summary: Get gas usage metrics over time.
+      security:
+        - MetricsKey: []
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/DateFromQuery'
+        - $ref: '#/components/parameters/DateToQuery'
+      responses:
+        '200':
+          description: Gas metrics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/metrics/payments:
+    get:
+      tags: [Metrics]
+      summary: Get payment metrics grouped by day and merchant.
+      security:
+        - MetricsKey: []
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/DateFromQuery'
+        - $ref: '#/components/parameters/DateToQuery'
+      responses:
+        '200':
+          description: Payment metrics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/metrics/registrations:
+    get:
+      tags: [Metrics]
+      summary: Get data registration metrics grouped by day and partner.
+      security:
+        - MetricsKey: []
+        - AdminBearer: []
+      parameters:
+        - $ref: '#/components/parameters/DateFromQuery'
+        - $ref: '#/components/parameters/DateToQuery'
+      responses:
+        '200':
+          description: Registration metrics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/metrics/network:
+    get:
+      tags: [Metrics]
+      summary: Get a network health snapshot with block timing and peers.
+      security:
+        - MetricsKey: []
+        - AdminBearer: []
+      responses:
+        '200':
+          description: Network metrics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/rewards/types:
+    get:
+      tags: [Rewards]
+      summary: List configured reward types and reward pool metadata.
+      responses:
+        '200':
+          description: Reward types.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/rewards/distribute:
+    post:
+      tags: [Rewards]
+      summary: Distribute a predefined reward type to a wallet.
+      security:
+        - PaymentApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardDistributeRequest'
+      responses:
+        '200':
+          description: Reward sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/rewards/distribute-by-user:
+    post:
+      tags: [Rewards]
+      summary: Distribute a reward using a Keycloak user ID lookup.
+      security:
+        - DataApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardDistributeByUserRequest'
+      responses:
+        '200':
+          description: Reward sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/rewards/distribute-custom:
+    post:
+      tags: [Rewards]
+      summary: Distribute a custom reward amount to a wallet.
+      security:
+        - PaymentApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardDistributeCustomRequest'
+      responses:
+        '200':
+          description: Custom reward sent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/rewards/stats/{address}:
+    get:
+      tags: [Rewards]
+      summary: Get per-reward-type stats for a wallet.
+      parameters:
+        - $ref: '#/components/parameters/AddressParam'
+      responses:
+        '200':
+          description: Reward stats.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'
+  /api/rewards/global:
+    get:
+      tags: [Rewards]
+      summary: Get total rewards distributed and total claim count.
+      responses:
+        '200':
+          description: Global reward totals.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericObject'

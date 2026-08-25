@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   app:
     repository: "358438442054.dkr.ecr.us-east-1.amazonaws.com/production/swagger"
-    tag: "7726c2c"
+    tag: "011897d"
     pullPolicy: "Always"
 
 imagePullSecret:
@@ -33,4 +33,19 @@ resources:
 
 env:
   variables:
-
+    # Bundled in public/configs (service does not serve its own spec over HTTP).
+    IAM_DOCS_URL: "/configs/iam.json"
+    FINANCE_DOCS_URL: "/configs/finance.yaml"
+    CHAIN_DOCS_URL: "/configs/chain.yaml"
+    GAMES_DOCS_URL: "/configs/games.json"
+    # Served by the owning service.
+    ACCOUNTS_DOCS_URL: "https://api.tupic.com/accounts/docs/public/user/doc.json"
+    LIVE_V2_DOCS_URL: "https://api.live.tupic.com/swagger/api.json"
+    LIVE_V3_DOCS_URL: "https://api.tupic.com/live/v3/docs/public/user/doc.json"
+    MOMENT_DOCS_URL: "https://api.tupic.com/moment/docs/public/user/doc.json"
+    ASSETS_DOCS_URL: "https://api.tupic.com/assets/docs/public/user/doc.json"
+    INSIGHTS_DOCS_URL: "https://api.tupic.com/insights/v1/openapi.json"
+    NOTIFICATIONS_DOCS_URL: "https://api.tupic.com/notifications/docs/public/user/doc.json"
+    ACADEMY_DOCS_URL: "https://api.tupic.com/support/openapi.json"
+    DEVELOPERS_DOCS_URL: "https://api.tupic.com/developers/swagger.json"
+    PRIMARY_DOCS_NAME: "Tupic Live (v2)"

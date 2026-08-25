@@ -33,3 +33,19 @@ resources:
 
 env:
   variables:
+    # Bundled in public/configs (service does not serve its own spec over HTTP).
+    IAM_DOCS_URL: "/configs/iam.json"
+    FINANCE_DOCS_URL: "/configs/finance.yaml"
+    CHAIN_DOCS_URL: "/configs/chain.yaml"
+    GAMES_DOCS_URL: "/configs/games.json"
+    # Served by the owning service.
+    ACCOUNTS_DOCS_URL: "https://api.tupic.dev/accounts/docs/public/user/doc.json"
+    LIVE_V2_DOCS_URL: "https://api.live.tupic.dev/swagger/api.json"
+    LIVE_V3_DOCS_URL: "https://api.tupic.dev/live/v3/docs/public/user/doc.json"
+    MOMENT_DOCS_URL: "https://api.tupic.dev/moment/docs/public/user/doc.json"
+    ASSETS_DOCS_URL: "https://api.tupic.dev/assets/docs/public/user/doc.json"
+    INSIGHTS_DOCS_URL: "https://api.tupic.dev/insights/v1/openapi.json"
+    NOTIFICATIONS_DOCS_URL: "https://api.tupic.dev/notifications/docs/public/user/doc.json"
+    ACADEMY_DOCS_URL: "https://api.tupic.dev/support/openapi.json"
+    DEVELOPERS_DOCS_URL: "https://api.tupic.dev/developers/swagger.json"
+    PRIMARY_DOCS_NAME: "Tupic Live (v2)"

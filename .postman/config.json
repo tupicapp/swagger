@@ -10,7 +10,9 @@
     "specs": [
       "../public/configs/blog-v1-development.json",
       "../public/configs/blog-v1-production.json",
+      "../public/configs/chain.yaml",
       "../public/configs/finance.yaml",
+      "../public/configs/games.json",
       "../public/configs/iam.json"
     ],
     "collections": []
