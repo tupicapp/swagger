@@ -13,6 +13,14 @@
     {
       "url": "https://api.tupic.com/games/api/v1",
       "description": "Production"
+    },
+    {
+      "url": "https://api.tupic.dev/games/api/v1",
+      "description": "Development"
+    },
+    {
+      "url": "http://localhost:5000/games/api/v1",
+      "description": "Local"
     }
   ],
   "security": [

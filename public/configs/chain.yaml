@@ -6,6 +6,10 @@ info:
 servers:
   - url: https://chain.tupic.com
     description: Production
+  - url: https://chain.tupic.dev
+    description: Development
+  - url: http://localhost:4000
+    description: Local
 tags:
   - name: RPC
   - name: Auth
