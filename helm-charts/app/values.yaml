@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   app:
-    repository: "358438442054.dkr.ecr.us-east-1.amazonaws.com/production/swagger"
+    repository: "762071317829.dkr.ecr.eu-west-1.amazonaws.com/production/swagger"
     tag: "c8176b1"
     pullPolicy: "Always"
 
