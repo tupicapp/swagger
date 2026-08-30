@@ -15,10 +15,12 @@ info:
     name: API Support
 
 servers:
-  - url: http://localhost:5000
-    description: Development
-  - url: https://api.your-domain.com
+  - url: https://api.tupic.com/finance
     description: Production
+  - url: https://api.tupic.dev/finance
+    description: Development
+  - url: http://localhost:5000
+    description: Local
 
 components:
   securitySchemes:

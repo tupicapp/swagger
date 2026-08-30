@@ -7,12 +7,16 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
-      "description": "Local development"
-    },
-    {
       "url": "https://iam.tupic.com",
       "description": "Production"
+    },
+    {
+      "url": "https://iam.tupic.dev",
+      "description": "Development"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local"
     }
   ],
   "tags": [

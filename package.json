@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
+    "typescript": "^7.0.2",
     "vite": "^5.2.0"
   },
   "dependencies": {
     "@tupicapp/web-ui": "^0.4.5",
     "@types/swagger-ui-dist": "^3.30.4",
-    "swagger-ui-dist": "^5.31.0"
+    "swagger-ui-dist": "^5.32.14"
   }
 }
