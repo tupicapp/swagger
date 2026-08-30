@@ -26,7 +26,8 @@ jobs:
       contents: read
       id-token: write
       packages: read
-    secrets: inherit
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
     with:
       dockerfile: Dockerfile
       environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
