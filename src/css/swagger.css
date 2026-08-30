@@ -263,6 +263,46 @@ thead tr td,
     border-bottom: 1px solid var(--border-color);
 }
 
+/* Inline code chips inside markdown descriptions.
+   Swagger's default padding makes each chip taller than its line box, so chips on
+   consecutive lines collide. Keep the padding relative to the font and give the
+   surrounding copy enough leading for a chip to sit inside its own line. */
+.swagger-ui .markdown p,
+.swagger-ui .markdown li,
+.swagger-ui .renderedMarkdown p,
+.swagger-ui .renderedMarkdown li {
+    line-height: 1.9;
+}
+
+.swagger-ui .markdown code,
+.swagger-ui .renderedMarkdown code,
+html.dark-mode .swagger-ui .markdown code,
+html.dark-mode .swagger-ui .renderedMarkdown code {
+    display: inline;
+    padding: 0.1em 0.4em;
+    border: 1px solid color-mix(in srgb, var(--brand-primary) 22%, transparent);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+    color: color-mix(in srgb, var(--brand-primary) 75%, var(--text-primary));
+    font-size: 0.9em;
+    font-weight: 500;
+    line-height: inherit;
+    vertical-align: baseline;
+    overflow-wrap: break-word;
+}
+
+.swagger-ui .markdown pre code,
+.swagger-ui .renderedMarkdown pre code,
+html.dark-mode .swagger-ui .markdown pre code,
+html.dark-mode .swagger-ui .renderedMarkdown pre code {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: inherit;
+}
+
 @media (max-width: 767px) {
     .swagger-ui {
         padding-inline: 14px;
