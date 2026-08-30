@@ -66,7 +66,7 @@ const definitions = [
         name: "Tupic Developers (v1)",
         url: readConfig('DEVELOPERS_DOCS_URL', import.meta.env.VITE_DEVELOPERS_URL, "https://api.tupic.com/developers/swagger.json"),
     },
-];
+].sort((a, b) => a.name.localeCompare(b.name));
 
 const primaryName = readConfig('PRIMARY_DOCS_NAME', import.meta.env.VITE_PRIMARY_DOCS_NAME, "Tupic Live (v2)");
 
