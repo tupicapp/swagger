@@ -19,7 +19,7 @@ const definitions = [
         url: readConfig('IAM_DOCS_URL', import.meta.env.VITE_IAM_URL, "/configs/iam.json"),
     },
     {
-        name: "Tupic Accounts (v2)",
+        name: "Tupic Accounts (v1)",
         url: readConfig('ACCOUNTS_DOCS_URL', import.meta.env.VITE_ACCOUNTS_URL, "https://api.tupic.com/accounts/docs/public/user/doc.json"),
     },
     {
