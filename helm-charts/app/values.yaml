@@ -40,7 +40,7 @@ env:
     GAMES_DOCS_URL: "/configs/games.json"
     # Served by the owning service.
     ACCOUNTS_DOCS_URL: "https://api.tupic.com/accounts/docs/public/user/doc.json"
-    LIVE_V2_DOCS_URL: "https://api.live.tupic.com/swagger/api.json"
+    LIVE_V2_DOCS_URL: "https://api.tupic.com/live/v2/swagger/api.json"
     LIVE_V3_DOCS_URL: "https://api.tupic.com/live/v3/docs/public/user/doc.json"
     MOMENT_DOCS_URL: "https://api.tupic.com/moment/docs/public/user/doc.json"
     ASSETS_DOCS_URL: "https://api.tupic.com/assets/docs/public/user/doc.json"

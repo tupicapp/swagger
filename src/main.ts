@@ -24,7 +24,7 @@ const definitions = [
     },
     {
         name: "Tupic Live (v2)",
-        url: readConfig('LIVE_V2_DOCS_URL', import.meta.env.VITE_LIVE_CORE_URL, "https://api.live.tupic.com/swagger/api.json"),
+        url: readConfig('LIVE_V2_DOCS_URL', import.meta.env.VITE_LIVE_CORE_URL, "https://api.tupic.com/live/v2/swagger/api.json"),
     },
     {
         name: "Tupic Live (v3)",
