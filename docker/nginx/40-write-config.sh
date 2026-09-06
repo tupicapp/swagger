@@ -7,7 +7,7 @@ escape() {
 
 # Every entry in the Swagger UI definition dropdown is resolved at container
 # start from the environment, so the same image serves every environment.
-# Values come from helm-charts/app/values*.yaml -> ConfigMap -> envFrom.
+# Values come from platform-manifests' charts/swagger/values*.yaml -> ConfigMap -> envFrom.
 emit() {
   printf '  %s: "%s",\n' "$1" "$(escape "$2")"
 }

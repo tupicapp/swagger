@@ -33,7 +33,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 
 RUN chmod +x /docker-entrypoint.d/40-write-config.sh
 
-# Overridden per environment via helm-charts/app/values*.yaml -> ConfigMap -> envFrom.
+# Overridden per environment via platform-manifests' charts/swagger/values*.yaml -> ConfigMap -> envFrom.
 ENV IAM_DOCS_URL="" \
     ACCOUNTS_DOCS_URL="" \
     LIVE_V2_DOCS_URL="" \

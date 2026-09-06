@@ -5,8 +5,6 @@ on:
     branches:
       - dev
       - main
-    paths-ignore:
-      - helm-charts/app/**
   workflow_dispatch:
 
 permissions:
@@ -36,41 +34,12 @@ jobs:
   update-manifest:
     name: Update Helm Manifest
     needs: build
-    runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'development' }}
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Update image tag
-        run: |
-          FILE="${{ github.ref_name == 'main' && 'helm-charts/app/values.yaml' || 'helm-charts/app/values.development.yaml' }}"
-          TAG="${{ needs.build.outputs.image_tag }}"
-
-          echo "Updating $FILE with new tag: $TAG"
-          sed -i "s|tag:.*|tag: \"$TAG\"|g" "$FILE"
-
-      - name: Commit and push changes
-        run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          AUTHOR_NAME=$(git log -1 --pretty="%an")
-          AUTHOR_EMAIL=$(git log -1 --pretty="%ae")
-
-          git config user.name "$AUTHOR_NAME"
-          git config user.email "$AUTHOR_EMAIL"
-
-          git add helm-charts/app/
-
-          if git diff --cached --quiet; then
-            echo "No changes in Helm values - skipping commit."
-          else
-            echo "Committing Helm update..."
-            git commit -m "$COMMIT_MSG"
-            git push
-          fi
+    uses: tupicapp/platform-workflows/.github/workflows/update-manifest.yaml@main
+    with:
+      # The chart directory in platform-manifests. Spelled out rather than left
+      # to default from the repository name: six of these repositories are named
+      # something else on GitHub than the ArgoCD Application that deploys them,
+      # and a rename should not quietly stop deployments.
+      app: swagger
+      image_tag: ${{ needs.build.outputs.image_tag }}
+    secrets: inherit

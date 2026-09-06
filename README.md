@@ -10,11 +10,11 @@ URLs are **not** baked into the bundle. At container start
 environment, and `src/lib/config.ts` reads it. One image therefore serves every
 environment.
 
-    helm-charts/app/values*.yaml -> ConfigMap -> envFrom -> /config.js -> Swagger UI
+    ../platform-manifests/charts/swagger/values*.yaml -> ConfigMap -> envFrom -> /config.js -> Swagger UI
 
 To change or add a URL, edit `env.variables` in
-[helm-charts/app/values.yaml](helm-charts/app/values.yaml) (production) and
-[helm-charts/app/values.development.yaml](helm-charts/app/values.development.yaml)
+[../platform-manifests/charts/swagger/values.yaml](../platform-manifests/charts/swagger/values.yaml) (production) and
+[../platform-manifests/charts/swagger/values.development.yaml](../platform-manifests/charts/swagger/values.development.yaml)
 (development). Adding a *new* service also means adding its key to the
 `RuntimeConfigKey` union in `src/lib/config.ts`, the `emit` list in
 `docker/nginx/40-write-config.sh`, the `ENV` block in the `Dockerfile`, and an

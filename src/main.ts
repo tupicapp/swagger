@@ -10,7 +10,7 @@ import {SwaggerUIBundle, SwaggerUIStandalonePreset} from "swagger-ui-dist"
 import {readConfig} from './lib/config';
 
 // Fallbacks below are the production URLs and only apply to `yarn dev`; deployed
-// values come from helm-charts/app/values*.yaml via /config.js. Specs marked
+// values come from platform-manifests' charts/swagger/values*.yaml via /config.js. Specs marked
 // /configs/* are bundled from public/configs because the owning service does not
 // serve them over HTTP.
 const definitions = [

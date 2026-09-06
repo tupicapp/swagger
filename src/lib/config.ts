@@ -1,7 +1,7 @@
 /**
  * Every Swagger UI definition URL is resolved at runtime from `/config.js`,
  * which the container entrypoint writes from its environment. That keeps the
- * URLs in helm-charts/app/values*.yaml instead of baked into the bundle, so one
+ * URLs in platform-manifests' charts/swagger/values*.yaml instead of baked into the bundle, so one
  * image serves every environment.
  *
  * Resolution order per key: runtime `/config.js` -> build-time `VITE_*` -> the
